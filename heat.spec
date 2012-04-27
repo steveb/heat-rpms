@@ -61,6 +61,15 @@ Requires: %{name} = %{version}-%{release}
 %description common 
 This package contains the common utilities for the Heat project
 
+%package metadata
+License: ASL 2.0
+Summary: Metadata server for the Heat project
+Group: System Environment/Base
+Requires: %{name} = %{version}-%{release}
+
+%description metadata
+This package contains the metadata server for the Heat project
+
 %package engine 
 License: ASL 2.0
 Summary: Engine for the Heat project
@@ -131,6 +140,17 @@ This package contains the OpenStack integration for the Heat project
 %{python_sitelib}/heat/common/policy.*
 %{python_sitelib}/heat/common/utils.*
 %{python_sitelib}/heat/common/wsgi.*
+
+%files metadata
+%doc README.rst
+%defattr(-,root,root,-)
+%{_mandir}/man1/*.gz
+%{_bindir}/heat-metadata
+%{python_sitelib}/heat/metadata/__init__.*
+%{python_sitelib}/heat/metadata/api/__init__.*
+%{python_sitelib}/heat/metadata/api/v1/__init__.*
+%{python_sitelib}/heat/metadata/api/v1/metadata.*
+%{_localstatedir}/log/heat/metadata.log
 
 %files engine
 %doc README.rst
