@@ -1,8 +1,6 @@
-%{!?python_sitelib: %global python_sitelib %(%{__python} -c "from distutils.sysconfig import get_python_lib; print(get_python_lib())")}
-
 Name: heat
-Summary: The Heat project
-Version: 3
+Summary: This software provides AWS CloudFormation functionality for OpenStack Essex
+Version: 4
 Release: 1
 License: ASL 2.0
 Prefix: %{_prefix}
@@ -10,21 +8,20 @@ Group: System Environment/Base
 URL: http://www.heat-api.org
 Source0: http://heat-api.org/downloads/%{name}-%{version}/%{name}-%{version}.tar.gz
 
-Requires: pacemaker-cloud
-
 BuildArch: noarch
 BuildRequires: python-glance
+BuildRequires: python-devel
 
 BuildRoot: %{_tmppath}/%{name}-%{version}-%{release}-buildroot
 
 %prep
-%setup -q -c heat-%{version} -n %{name}-%{version}
+%setup -q
 
 %build
-python setup.py build
+%{__python} setup.py build
 
 %install
-python setup.py install -O1 --root=$RPM_BUILD_ROOT --record=INSTALLED_FILES
+%{__python} setup.py install -O1 --skip-build --root=$RPM_BUILD_ROOT
 mkdir -p $RPM_BUILD_ROOT/var/log/heat/
 mkdir -p $RPM_BUILD_ROOT/var/lib/heat/
 mkdir -p $RPM_BUILD_ROOT/etc/heat/
@@ -32,160 +29,43 @@ cp -r etc/* $RPM_BUILD_ROOT/etc/heat/
 mkdir -p $RPM_BUILD_ROOT/%{_mandir}/man1/ 
 cp -v docs/man/man1/* $RPM_BUILD_ROOT/%{_mandir}/man1/
 rm -rf $RPM_BUILD_ROOT/var/lib/heat/.dummy
-rm -rf $RPM_BUILD_ROOT/%{python_sitelib}/heat/vcsversion.*
-rm -rf $RPM_BUILD_ROOT/%{python_sitelib}/heat/tests
-rm -rf $RPM_BUILD_ROOT/%{python_sitelib}/heat/testing
-rm -rf $RPM_BUILD_ROOT/%{python_sitelib}/heat-%{version}-py2.7.egg-info
 
 %clean
 rm -rf $RPM_BUILD_ROOT
 
 %description
-Heat provides a programmable interface to orchestrate the setup of multiple cloud applications
-
-%package api
-License: ASL 2.0
-Summary: External API for the Heat project
-Group: System Environment/Base
-Requires: %{name} = %{version}-%{release}
-
-%description api
-This package contains the external api for the Heat project
-
-%package common 
-License: ASL 2.0
-Summary: Common utilities for the Heat project
-Group: System Environment/Base
-Requires: %{name} = %{version}-%{release}
-
-%description common 
-This package contains the common utilities for the Heat project
-
-%package metadata
-License: ASL 2.0
-Summary: Metadata server for the Heat project
-Group: System Environment/Base
-Requires: %{name} = %{version}-%{release}
-
-%description metadata
-This package contains the metadata server for the Heat project
-
-%package engine 
-License: ASL 2.0
-Summary: Engine for the Heat project
-Group: System Environment/Base
-Requires: %{name} = %{version}-%{release}
-
-%description engine 
-This package contains the engine and internal API for the Heat project
-
-%package jeos 
-License: ASL 2.0
-Summary: JEOS configuration files for the Heat project
-Group: System Environment/Base
-Requires: %{name} = %{version}-%{release}
-
-%description jeos 
-This package contains the Just Enough OS configuration files
-
-%package openstack 
-License: ASL 2.0
-Summary: OpenStack integration for the Heat project
-Group: System Environment/Base
-Requires: %{name} = %{version}-%{release}
-
-%description openstack
-This package contains the OpenStack integration for the Heat project
-
+Heat provides AWS CloudFormation functionality for OpenStack.
 
 %files
 %doc README.rst
 %defattr(-,root,root,-)
 %{_mandir}/man1/*.gz
 %{_bindir}/heat
-%{_bindir}/heat-db-setup
-%{python_sitelib}/heat/db/*
-%{python_sitelib}/heat/__init__.*
-%{python_sitelib}/heat/client.*
-%{python_sitelib}/heat/utils.*
-%{python_sitelib}/heat/cloudformations.*
-%{python_sitelib}/heat/version.*
-%config(noreplace) /etc/heat
-%config(noreplace) /etc/bash_completion.d/
-
-%files api
-%doc README.rst
-%defattr(-,root,root,-)
-%{_mandir}/man1/*.gz
 %{_bindir}/heat-api
-%{python_sitelib}/heat/api/__init__.*
-%{python_sitelib}/heat/api/versions.*
-%{python_sitelib}/heat/api/middleware/__init__.*
-%{python_sitelib}/heat/api/middleware/version_negotiation.*
-%{python_sitelib}/heat/api/middleware/context.*
-%{python_sitelib}/heat/api/v1/__init__.*
-%{python_sitelib}/heat/api/v1/stacks.*
-%{_localstatedir}/log/heat/api.log
-
-%files common
-%doc README.rst
-%defattr(-,root,root,-)
-%{python_sitelib}/heat/common/auth.*
-%{python_sitelib}/heat/common/client.*
-%{python_sitelib}/heat/common/config.*
-%{python_sitelib}/heat/common/context.*
-%{python_sitelib}/heat/common/crypt.*
-%{python_sitelib}/heat/common/exception.*
-%{python_sitelib}/heat/common/__init__.*
-%{python_sitelib}/heat/common/policy.*
-%{python_sitelib}/heat/common/utils.*
-%{python_sitelib}/heat/common/wsgi.*
-
-%files metadata
-%doc README.rst
-%defattr(-,root,root,-)
-%{_mandir}/man1/*.gz
-%{_bindir}/heat-metadata
-%{python_sitelib}/heat/metadata/__init__.*
-%{python_sitelib}/heat/metadata/api/__init__.*
-%{python_sitelib}/heat/metadata/api/v1/__init__.*
-%{python_sitelib}/heat/metadata/api/v1/metadata.*
-%{_localstatedir}/log/heat/metadata.log
-
-%files engine
-%doc README.rst
-%defattr(-,root,root,-)
-%{_mandir}/man1/*.gz
 %{_bindir}/heat-engine
-%{python_sitelib}/heat/engine/*
-%{python_sitelib}/heat/openstack/*
-%{python_sitelib}/heat/cfntools/*
-%{python_sitelib}/heat/cloudinit/*
-%{python_sitelib}/heat/rpc/*
-%{python_sitelib}/heat/context.*
-%{python_sitelib}/heat/manager.*
-%{python_sitelib}/heat/service.*
-%{_localstatedir}/log/heat/engine.log
+%{_bindir}/heat-metadata
+%{_bindir}/heat-db-setup
+%{python_sitelib}/heat*
+%dir %{_localstatedir}/log/heat
+%dir %{_localstatedir}/lib/heat
+%config(noreplace) %dir %{_sysconfdir}/heat/bash_completion.d/heat
+%config(noreplace) %{_sysconfdir}/heat/heat-api-paste.ini
+%config(noreplace) %{_sysconfdir}/heat/heat-api.conf
+%config(noreplace) %{_sysconfdir}/heat/heat-engine-paste.ini
+%config(noreplace) %{_sysconfdir}/heat/heat-engine.conf
+%config(noreplace) %{_sysconfdir}/heat/heat-metadata-paste.ini
+%config(noreplace) %{_sysconfdir}/heat/heat-metadata.conf
 
-%files jeos
-%doc README.rst
-%defattr(-,root,root,-)
-%{python_sitelib}/heat/jeos/F16-x86_64-gold-jeos.tdl
-%{python_sitelib}/heat/jeos/F16-i386-gold-jeos.tdl
-%{python_sitelib}/heat/jeos/F17-x86_64-gold-jeos.tdl
-%{python_sitelib}/heat/jeos/F17-i386-gold-jeos.tdl
-%{python_sitelib}/heat/jeos/F16-x86_64-cfntools-jeos.tdl
-%{python_sitelib}/heat/jeos/F16-i386-cfntools-jeos.tdl
-%{python_sitelib}/heat/jeos/F17-x86_64-cfntools-jeos.tdl
-%{python_sitelib}/heat/jeos/F17-i386-cfntools-jeos.tdl
+%changelog
+* Fri Jun 8 2012 Steven Dake <sdake@redhat.com> - 4-1
+- removed jeos from packaging since that comes from another repository
+- compressed all separate packages into one package
+- removed setup options which were producing incorrect results
+- replaced python with {__python}
+- added a br on python-devel
+- added a --skip-build to the install step
+- added percent-dir for directories
+- fixed most rpmlint warnings/errors
 
-%files openstack
-%doc README.rst
-%defattr(-,root,root,-)
-%{python_sitelib}/heat/openstack/__init__.*
-%{python_sitelib}/heat/openstack/common/cfg.*
-%{python_sitelib}/heat/openstack/common/__init__.*
-
-%changelog heat api common engine jeos openstack
-* Mon Apr 16 2012 Chris Alfonso <calfonso@redhat.com> - {%version}
+* Mon Apr 16 2012 Chris Alfonso <calfonso@redhat.com> - 3-1
 - initial openstack package log
