@@ -3,7 +3,14 @@ heat-rpms
 
 Repo for creating rpm packaging for the heat projects:
 
-Step 1: get the src for the heat project
+Step 1: Create a heat tar.gz file
 
-Step 2: built a tarball file in that directory and copy it to the root directory of this repo.
-        tar -zcvf heat-%{version}.tar.gz --exclude=.git .
+linux% git clone git://github.com/heat-api/heat.git
+linux% cd heat
+linux% ./setup.py sdist
+
+This will create a source distributoin of heat in dist/heat-$VER.tar.gz
+
+Step 2: Create the RPM
+
+linux% make rpm
