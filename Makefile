@@ -9,7 +9,7 @@ RPMVERSION := $(shell awk '/Version/{print $$2; exit}' < heat.spec | cut -d "%" 
 RPMRELEASE := $(shell awk '/Release/{print $$2; exit}' < heat.spec | cut -d "%" -f1)
 RPMNVR = "$(NAME)-$(RPMVERSION)-$(RPMRELEASE)"
 
-all: clean python
+all: clean rpm
 
 docs: $(MANPAGES)
 
@@ -22,6 +22,7 @@ docs: $(MANPAGES)
 rpmcommon:
 	@mkdir -p rpm-build
 	@cp *.gz rpm-build/
+	@cp *.logrotate rpm-build/
 
 clean:
 	@echo "Cleaning up, removing rpm-build dir"
