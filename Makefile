@@ -1,17 +1,13 @@
 #!/usr/bin/make
 
-NAME = "heat"
 ASCII2MAN = a2x -D $(dir $@) -d manpage -f manpage $<
 ASCII2HTMLMAN = a2x -D docs/html/man/ -d manpage -f xhtml
-MANPAGES := docs/man/man1/heat.1 docs/man/man1/heat-engine.1 docs/man/man1/heat-api.1
+HEATMANPAGES := docs/man/man1/heat.1 docs/man/man1/heat-engine.1 docs/man/man1/heat-api.1
 SITELIB = $(shell python -c "from distutils.sysconfig import get_python_lib; print get_python_lib()")
-RPMVERSION := $(shell awk '/Version/{print $$2; exit}' < heat.spec | cut -d "%" -f1)
-RPMRELEASE := $(shell awk '/Release/{print $$2; exit}' < heat.spec | cut -d "%" -f1)
-RPMNVR = "$(NAME)-$(RPMVERSION)-$(RPMRELEASE)"
 
-all: clean rpm
+all: clean heatrpm jeosrpm
 
-docs: $(MANPAGES)
+heatdocs: $(HEATMANPAGES)
 
 %.1: %.1.asciidoc
 	$(ASCII2MAN)
@@ -22,37 +18,41 @@ docs: $(MANPAGES)
 rpmcommon:
 	@mkdir -p rpm-build
 	@cp *.gz rpm-build/
+
+heatcommon:
 	@cp *.logrotate rpm-build/
 
 clean:
 	@echo "Cleaning up, removing rpm-build dir"
 	-rm -rf rpm-build
 
-srpm: rpmcommon
-	@rpmbuild --define "_topdir %(pwd)/rpm-build" \
-	--define "_builddir %{_topdir}" \
-	--define "_rpmdir %{_topdir}" \
-	--define "_srcrpmdir %{_topdir}" \
-	--define "_specdir %{_topdir}" \
-	--define "_sourcedir %{_topdir}" \
-	-bs heat.spec
-	@echo "#############################################"
-	@echo "heat SRPM is built:"
-	@echo "    rpm-build/$(RPMNVR).src.rpm"
-	@echo "#############################################"
+# buildargs, spec, rpmtype
+buildrpm = \
+		@rpmbuild --define "_topdir %(pwd)/rpm-build" \
+		--define "_builddir %{_topdir}" \
+		--define "_rpmdir %{_topdir}" \
+		--define "_srcrpmdir %{_topdir}" \
+		--define "_specdir %{_topdir}" \
+		--define "_sourcedir %{_topdir}" \
+		-$(1) $(2); \
+		echo "+++++++++++++++++++++++++++++++++++++++++++++"; \
+		echo -n "built:   $(shell awk '/Name/{print $$2}' < $(2))"; \
+		echo -n "-$(shell awk '/Version/{print $$2}' < $(2))"; \
+		echo -n "-$(shell awk '/Release/{print $$2}' < $(2))"; \
+		echo ".$(3).rpm"; \
+		echo "+++++++++++++++++++++++++++++++++++++++++++++";
 
-rpm: rpmcommon
-	@rpmbuild --define "_topdir %(pwd)/rpm-build" \
-	--define "_builddir %{_topdir}" \
-	--define "_rpmdir %{_topdir}" \
-	--define "_srcrpmdir %{_topdir}" \
-	--define "_specdir %{_topdir}" \
-	--define "_sourcedir %{_topdir}" \
-	-ba heat.spec
-	@echo "#############################################"
-	@echo "heat RPM is built:"
-	@echo "    rpm-build/noarch/$(RPMNVR).noarch.rpm"
-	@echo "#############################################"
+heatsrpm: rpmcommon heatcommon
+	$(call buildrpm,bs,heat.spec,src)
 
-.PHONEY: docs manual clean pep8
+heatrpm: rpmcommon heatcommon
+	$(call buildrpm,ba,heat.spec,noarch)
+
+jeossrpm: rpmcommon
+	$(call buildrpm,bs,heat_jeos.spec,src)
+
+jeosrpm: rpmcommon
+	$(call buildrpm,ba,heat_jeos.spec,noarch)
+
+.PHONEY: all heatdocs rpmcommon clean heatsrpm heatrpm
 vpath %.asciidoc docs/man/man1
