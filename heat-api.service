@@ -1,0 +1,12 @@
+[Unit]
+Description=The Heat API provides an AWS CloudFormation-compatible API to the Heat Engine for starting AWS CloudFormation templates on OpenStack.
+After=syslog.target network.target heat-engine.service
+Requires=syslog.target network.target heat-engine.service
+
+[Service]
+Type=simple
+ExecStart=/usr/bin/heat-api
+Restart=on-failure
+
+[Install]
+WantedBy=multi-user.target

@@ -1,0 +1,12 @@
+[Unit]
+Description=The Heat Engine provides an OpenStack API for starting AWS CloudFormation templates on OpenStack.
+After=syslog.target network.target qpidd.service mysqld.service openstack-keystone.service tgtd.service openstack-glance-api.service openstack-glance-registry.service openstack-nova-api.service openstack-nova-objectstore.service openstack-nova.compute.service openstack-nova-network.service openstack-nova-volume.service openstack-nova-scheduler.service openstack-nova-cert.service
+Requires=syslog.target network.target qpidd.service mysqld.service openstack-keystone.service tgtd.service openstack-glance-api.service openstack-glance-registry.service openstack-nova-api.service openstack-nova-objectstore.service openstack-nova-compute.service openstack-nova-network.service openstack-nova-volume.service openstack-nova-scheduler.service openstack-nova-cert.service
+
+[Service]
+Type=simple
+ExecStart=/usr/bin/heat-engine
+Restart=on-failure
+
+[Install]
+WantedBy=multi-user.target

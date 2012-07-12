@@ -21,6 +21,7 @@ rpmcommon:
 
 heatcommon:
 	@cp *.logrotate rpm-build/
+	@cp *.service rpm-build/
 
 clean:
 	@echo "Cleaning up, removing rpm-build dir"
