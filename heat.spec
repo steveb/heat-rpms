@@ -1,3 +1,6 @@
+%global git 0fc46d5
+%global github heat-api-heat
+
 Name: heat
 Summary: This software provides AWS CloudFormation functionality for OpenStack Essex
 Version: 5
@@ -5,7 +8,7 @@ Release: 1
 License: ASL 2.0
 Group: System Environment/Base
 URL: http://heat-api.org
-Source0: http://heat-api.org/downloads/%{name}/%{name}-%{version}.tar.gz
+Source0: http://github.com/heat-api/heat/tarball/master/%{github}-%{git}.tar.gz
 Source1: heat.logrotate
 Source2: heat-api.service
 Source3: heat-engine.service
@@ -40,7 +43,7 @@ Requires(preun): systemd-units
 Requires(postun): systemd-units
 
 %prep
-%setup -q
+%setup -q -n %{github}-%{git}
 
 %build
 %{__python} setup.py build
@@ -84,6 +87,7 @@ Heat provides AWS CloudFormation functionality for OpenStack.
 %config(noreplace) %{_sysconfdir}/heat/heat-engine.conf
 %config(noreplace) %{_sysconfdir}/heat/heat-metadata-paste.ini
 %config(noreplace) %{_sysconfdir}/heat/heat-metadata.conf
+%config(noreplace) %{_sysconfdir}/heat/boto.cfg
 %config(noreplace) %{_sysconfdir}/logrotate.d/heat
 
 %post
