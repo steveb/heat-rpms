@@ -1,14 +1,11 @@
-%global git 0fc46d5
-%global github heat-api-heat
-
 Name: heat
 Summary: This software provides AWS CloudFormation functionality for OpenStack Essex
-Version: 5
-Release: 1
+Version: 4
+Release: 2
 License: ASL 2.0
 Group: System Environment/Base
 URL: http://heat-api.org
-Source0: http://github.com/heat-api/heat/tarball/master/%{github}-%{git}.tar.gz
+Source0: https://github.com/downloads/heat-api/heat/heat-%{version}.tar.gz
 Source1: heat.logrotate
 Source2: heat-api.service
 Source3: heat-engine.service
@@ -43,7 +40,7 @@ Requires(preun): systemd-units
 Requires(postun): systemd-units
 
 %prep
-%setup -q -n %{github}-%{git}
+%setup -q
 
 %build
 %{__python} setup.py build
@@ -87,7 +84,6 @@ Heat provides AWS CloudFormation functionality for OpenStack.
 %config(noreplace) %{_sysconfdir}/heat/heat-engine.conf
 %config(noreplace) %{_sysconfdir}/heat/heat-metadata-paste.ini
 %config(noreplace) %{_sysconfdir}/heat/heat-metadata.conf
-%config(noreplace) %{_sysconfdir}/heat/boto.cfg
 %config(noreplace) %{_sysconfdir}/logrotate.d/heat
 
 %post
@@ -117,13 +113,14 @@ if [ $1 -ge 1 ] ; then
 fi
 
 %changelog
-* Wed Jul 11 2012 Jeff Peeler <jpeeler@redhat.com> - 5-1
+* Wed Jul 11 2012 Jeff Peeler <jpeeler@redhat.com> - 4-2
 - add necessary requires
 - removed shebang line for scripts not requiring executable permissions
 - add logrotate, removes all rpmlint warnings except for python-httplib2
 - remove buildroot tag since everything since F10 has a default buildroot
 - remove clean section as it is not required as of F13
 - add systemd unit files
+- change source URL to download location which doesn't require a SHA
 
 * Fri Jun 8 2012 Steven Dake <sdake@redhat.com> - 4-1
 - removed jeos from packaging since that comes from another repository
