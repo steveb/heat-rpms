@@ -6,7 +6,7 @@ Summary:	This software provides the ability to create JEOS images for Heat
 Group:		System Environment/Base
 License:	ASL 2.0
 URL:		http://heat-api.org
-Source0:	http://heat-api.org/downloads/%{name}/%{name}-%{version}.tar.gz
+Source0:	https://github.com/downloads/heat-api/heat-jeos/%{name}-%{version}.tar.gz
 
 BuildArch: noarch
 BuildRequires:	python-devel
