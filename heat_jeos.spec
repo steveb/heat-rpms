@@ -9,7 +9,7 @@ URL:		http://heat-api.org
 Source0:	https://github.com/downloads/heat-api/heat-jeos/%{name}-%{version}.tar.gz
 
 BuildArch: noarch
-BuildRequires:	python-devel
+BuildRequires:	python2-devel
 BuildRequires:	python-setuptools
 
 Requires:	heat

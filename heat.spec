@@ -12,7 +12,7 @@ Source3: heat-engine.service
 Source4: heat-metadata.service
 
 BuildArch: noarch
-BuildRequires: python-devel
+BuildRequires: python2-devel
 BuildRequires: python-setuptools
 BuildRequires: systemd-units
 
