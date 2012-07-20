@@ -1,7 +1,7 @@
 Name: heat
 Summary: This software provides AWS CloudFormation functionality for OpenStack Essex
 Version: 4
-Release: 2
+Release: 3
 License: ASL 2.0
 Group: System Environment/Base
 URL: http://heat-api.org
@@ -113,6 +113,9 @@ if [ $1 -ge 1 ] ; then
 fi
 
 %changelog
+* Fri Jul 20 2012 Jeff Peeler <jpeeler@redhat.com> - 4-3
+- change python-devel to python2-devel
+
 * Wed Jul 11 2012 Jeff Peeler <jpeeler@redhat.com> - 4-2
 - add necessary requires
 - removed shebang line for scripts not requiring executable permissions
