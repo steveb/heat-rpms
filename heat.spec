@@ -1,7 +1,7 @@
 Name: heat
 Summary: This software provides AWS CloudFormation functionality for OpenStack Essex
 Version: 4
-Release: 3
+Release: 4
 License: ASL 2.0
 Group: System Environment/Base
 URL: http://heat-api.org
@@ -16,7 +16,6 @@ BuildRequires: python2-devel
 BuildRequires: python-setuptools
 BuildRequires: systemd-units
 
-Requires: python-crypto
 Requires: python-eventlet
 Requires: python-glance
 Requires: python-greenlet
@@ -113,6 +112,9 @@ if [ $1 -ge 1 ] ; then
 fi
 
 %changelog
+* Tue Jul 24 2012 Jeff Peeler <jpeeler@redhat.com> - 4-4
+- remove pycrypto requires
+
 * Fri Jul 20 2012 Jeff Peeler <jpeeler@redhat.com> - 4-3
 - change python-devel to python2-devel
 
