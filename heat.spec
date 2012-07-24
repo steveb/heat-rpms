@@ -1,7 +1,7 @@
 Name: heat
 Summary: This software provides AWS CloudFormation functionality for OpenStack Essex
 Version: 4
-Release: 4
+Release: 5%{?dist}
 License: ASL 2.0
 Group: System Environment/Base
 URL: http://heat-api.org
@@ -68,14 +68,14 @@ rm -rf $RPM_BUILD_ROOT/var/lib/heat/.dummy
 Heat provides AWS CloudFormation functionality for OpenStack.
 
 %files
-%defattr(-, root, root, -)
-%doc README.rst
+%doc README.rst LICENSE
 %{_mandir}/man1/*.gz
 %{_bindir}/*
 %{python_sitelib}/heat*
 %dir %{_localstatedir}/log/heat
 %dir %{_localstatedir}/lib/heat
 %{_unitdir}/heat*.service
+%dir %{_sysconfdir}/heat
 %config(noreplace) %dir %{_sysconfdir}/heat/bash_completion.d/heat
 %config(noreplace) %{_sysconfdir}/heat/heat-api-paste.ini
 %config(noreplace) %{_sysconfdir}/heat/heat-api.conf
@@ -112,6 +112,12 @@ if [ $1 -ge 1 ] ; then
 fi
 
 %changelog
+* Tue Jul 24 2012 Jeff Peeler <jpeeler@redhat.com> - 4-5
+- added LICENSE to docs
+- added dist tag
+- added heat directory to files section
+- removed unnecessary defattr 
+
 * Tue Jul 24 2012 Jeff Peeler <jpeeler@redhat.com> - 4-4
 - remove pycrypto requires
 
