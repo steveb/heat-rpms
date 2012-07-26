@@ -1,6 +1,6 @@
 Name:		heat_jeos
 Version:	1
-Release:	2
+Release:	3
 Summary:	This software provides the ability to create JEOS images for Heat
 
 Group:		System Environment/Base
@@ -12,7 +12,6 @@ BuildArch: noarch
 BuildRequires:	python2-devel
 BuildRequires:	python-setuptools
 
-Requires:	heat
 Requires:	oz
 Requires:	yum
 
@@ -54,6 +53,9 @@ cp -v docs/man/man1/* $RPM_BUILD_ROOT/%{_mandir}/man1
 
 
 %changelog
+* Thu Jul 26 2012 Jeff Peeler <jpeeler@redhat.com> 1-3
+- removed heat requires
+
 * Fri Jul 20 2012 Jeff Peeler <jpeeler@redhat.com> 1-2
 - change python-devel to python2-devel
 
