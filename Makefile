@@ -18,6 +18,7 @@ heatdocs: $(HEATMANPAGES)
 rpmcommon:
 	@mkdir -p rpm-build
 	@cp *.gz rpm-build/
+	@cp patches/* rpm-build/
 
 heatcommon:
 	@cp *.logrotate rpm-build/

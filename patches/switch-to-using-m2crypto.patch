@@ -1,0 +1,77 @@
+From 05ce67d3842b09943b21e7e72eff1849bc1b32b7 Mon Sep 17 00:00:00 2001
+From: Ian Main <imain@redhat.com>
+Date: Fri, 27 Jul 2012 08:43:10 -0700
+Subject: [PATCH] Switch to using M2Crypto
+
+This patch uses M2Crypto instead of PyCrypto to perform encryption
+and decryption of user authentication information.
+
+Change-Id: Ib40492d4d40a92bf0167c249b15458c89af4716e
+Signed-off-by: Ian Main <imain@redhat.com>
+---
+ heat/engine/auth.py |   22 ++++++++++++----------
+ tools/pip-requires  |    2 +-
+ 2 files changed, 13 insertions(+), 11 deletions(-)
+
+diff --git a/heat/engine/auth.py b/heat/engine/auth.py
+index a4be7ef..5d16f84 100644
+--- a/heat/engine/auth.py
++++ b/heat/engine/auth.py
+@@ -24,8 +24,8 @@ from novaclient.exceptions import AuthorizationFailure
+ from heat.common import context
+ from heat.openstack.common import log as logging
+ 
+-from Crypto.Cipher import AES
+-from Crypto import Random
++import M2Crypto
++import os
+ 
+ from heat.openstack.common import cfg
+ from heat.openstack.common import importutils
+@@ -45,20 +45,22 @@ logger = logging.getLogger('heat.engine.auth')
+ def encrypt(auth_info):
+     if auth_info is None:
+         return None
+-    iv = Random.new().read(AES.block_size)
+-    cipher = AES.new(cfg.CONF.auth_encryption_key[:32], AES.MODE_CFB, iv)
+-    res = base64.b64encode(iv + cipher.encrypt(auth_info))
+-    return res
++    iv = os.urandom(16)
++    cipher = M2Crypto.EVP.Cipher(alg='aes_128_cbc',
++                                 key=cfg.CONF.auth_encryption_key, iv=iv,
++                                 op=1) # 1 is encode
++    return base64.b64encode(iv + cipher.update(auth_info) + cipher.final())
+ 
+ 
+ def decrypt(auth_info):
+     if auth_info is None:
+         return None
+     auth = base64.b64decode(auth_info)
+-    iv = auth[:AES.block_size]
+-    cipher = AES.new(cfg.CONF.auth_encryption_key[:32], AES.MODE_CFB, iv)
+-    res = cipher.decrypt(auth[AES.block_size:])
+-    return res
++    iv = auth[:16]
++    cipher = M2Crypto.EVP.Cipher(alg='aes_128_cbc',
++                                 key=cfg.CONF.auth_encryption_key, iv=iv,
++                                 op=0) # 0 is decode
++    return cipher.update(auth[16:]) + cipher.final()
+ 
+ 
+ def authenticate(con, service_type='heat', service_name='heat'):
+diff --git a/tools/pip-requires b/tools/pip-requires
+index 1fcfdf3..4efd475 100644
+--- a/tools/pip-requires
++++ b/tools/pip-requires
+@@ -9,7 +9,7 @@
+ # installed using pip, therefore you will need to install the
+ # libxml2-dev(el) and libxslt-dev(el) packages.
+ 
+-PyCrypto
++M2Crypto
+ eventlet
+ greenlet
+ httplib2
+-- 
+1.7.10.4
+

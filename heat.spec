@@ -1,7 +1,7 @@
 Name: heat
 Summary: This software provides AWS CloudFormation functionality for OpenStack Essex
-Version: 4
-Release: 5%{?dist}
+Version: 5
+Release: 1%{?dist}
 License: ASL 2.0
 Group: System Environment/Base
 URL: http://heat-api.org
@@ -10,6 +10,8 @@ Source1: heat.logrotate
 Source2: heat-api.service
 Source3: heat-engine.service
 Source4: heat-metadata.service
+
+Patch0: switch-to-using-m2crypto.patch
 
 BuildArch: noarch
 BuildRequires: python2-devel
@@ -40,6 +42,7 @@ Requires(postun): systemd-units
 
 %prep
 %setup -q
+%patch0 -p1
 
 %build
 %{__python} setup.py build
@@ -83,6 +86,7 @@ Heat provides AWS CloudFormation functionality for OpenStack.
 %config(noreplace) %{_sysconfdir}/heat/heat-engine.conf
 %config(noreplace) %{_sysconfdir}/heat/heat-metadata-paste.ini
 %config(noreplace) %{_sysconfdir}/heat/heat-metadata.conf
+%config(noreplace) %{_sysconfdir}/heat/boto.cfg
 %config(noreplace) %{_sysconfdir}/logrotate.d/heat
 
 %post
@@ -112,6 +116,11 @@ if [ $1 -ge 1 ] ; then
 fi
 
 %changelog
+* Fri Jul 27 2012 Ian Main <imain@redhat.com> - 5-1
+- added m2crypto patch.
+- bumped version for new release.
+- added boto.cfg to sysconfigdir
+
 * Tue Jul 24 2012 Jeff Peeler <jpeeler@redhat.com> - 4-5
 - added LICENSE to docs
 - added dist tag
