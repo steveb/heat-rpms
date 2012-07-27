@@ -1,6 +1,6 @@
 Name:		heat_jeos
 Version:	1
-Release:	3
+Release:	4
 Summary:	This software provides the ability to create JEOS images for Heat
 
 Group:		System Environment/Base
@@ -13,8 +13,6 @@ BuildRequires:	python2-devel
 BuildRequires:	python-setuptools
 
 Requires:	oz
-Requires:	yum
-
 Requires:	python-glance
 Requires:	python-lxml
 Requires:	python-prettytable
@@ -44,8 +42,7 @@ cp -v docs/man/man1/* $RPM_BUILD_ROOT/%{_mandir}/man1
 
 
 %files
-%defattr(-, root, root, -)
-%doc README.rst
+%doc README.rst LICENSE
 %{_mandir}/man1/*.gz
 %{_bindir}/heat-jeos
 %{python_sitelib}/heat_jeos*
@@ -53,6 +50,11 @@ cp -v docs/man/man1/* $RPM_BUILD_ROOT/%{_mandir}/man1
 
 
 %changelog
+* Fri Jul 27 2012 Jeff Peeler <jpeeler@redhat.com> 1-4
+- removed unnecessary defattr
+- added license file to docs
+- removed yum requires
+
 * Thu Jul 26 2012 Jeff Peeler <jpeeler@redhat.com> 1-3
 - removed heat requires
 
