@@ -11,7 +11,8 @@ Source2: heat-api.service
 Source3: heat-engine.service
 Source4: heat-metadata.service
 
-Patch0: switch-to-using-m2crypto.patch
+# fedora specific patches commented out
+#Patch0: switch-to-using-m2crypto.patch
 
 BuildArch: noarch
 BuildRequires: python2-devel
@@ -42,7 +43,7 @@ Requires(postun): systemd-units
 
 %prep
 %setup -q
-%patch0 -p1
+#%%patch0 -p1
 
 %build
 %{__python} setup.py build
