@@ -51,10 +51,10 @@ heatrpm: rpmcommon heatcommon
 	$(call buildrpm,ba,heat.spec,noarch)
 
 jeossrpm: rpmcommon
-	$(call buildrpm,bs,heat_jeos.spec,src)
+	$(call buildrpm,bs,heat-jeos.spec,src)
 
 jeosrpm: rpmcommon
-	$(call buildrpm,ba,heat_jeos.spec,noarch)
+	$(call buildrpm,ba,heat-jeos.spec,noarch)
 
 .PHONEY: all heatdocs rpmcommon clean heatsrpm heatrpm
 vpath %.asciidoc docs/man/man1
