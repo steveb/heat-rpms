@@ -1,6 +1,6 @@
 Name:		heat-jeos
-Version:	1
-Release:	6
+Version:	5
+Release:	1%{?dist}
 Summary:	This software provides the ability to create JEOS images for Heat
 
 Group:		System Environment/Base
@@ -50,6 +50,10 @@ cp -v docs/man/man1/* $RPM_BUILD_ROOT/%{_mandir}/man1
 
 
 %changelog
+* Tue Jul 31 2012 Jeff Peeler <jpeeler@redhat.com> 5-1
+- skip version numbers to match heat
+- add dist tag
+
 * Mon Jul 30 2012 Jeff Peeler <jpeeler@redhat.com> 1-5
 - renamed package from heat_jeos to heat-jeos
 
