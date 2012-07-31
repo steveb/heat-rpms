@@ -1,6 +1,6 @@
 Name: heat
 Summary: This software provides AWS CloudFormation functionality for OpenStack Essex
-Version: 5
+Version: 6
 Release: 1%{?dist}
 License: ASL 2.0
 Group: System Environment/Base
