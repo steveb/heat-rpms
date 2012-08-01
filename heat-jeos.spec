@@ -1,5 +1,5 @@
 Name:		heat-jeos
-Version:	5
+Version:	6
 Release:	1%{?dist}
 Summary:	This software provides the ability to create JEOS images for Heat
 
