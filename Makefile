@@ -30,19 +30,19 @@ clean:
 
 # buildargs, spec, rpmtype
 buildrpm = \
-		@rpmbuild --define "_topdir %(pwd)/rpm-build" \
-		--define "_builddir %{_topdir}" \
-		--define "_rpmdir %{_topdir}" \
-		--define "_srcrpmdir %{_topdir}" \
-		--define "_specdir %{_topdir}" \
-		--define "_sourcedir %{_topdir}" \
-		-$(1) $(2); \
-		echo "+++++++++++++++++++++++++++++++++++++++++++++"; \
-		echo -n "built:   $(shell awk '/Name/{print $$2}' < $(2))"; \
-		echo -n "-$(shell awk '/Version/{print $$2}' < $(2))"; \
-		echo -n "-$(shell awk '/Release/{print $$2}' < $(2))"; \
-		echo ".$(3).rpm"; \
-		echo "+++++++++++++++++++++++++++++++++++++++++++++";
+	@rpmbuild --define "_topdir %(pwd)/rpm-build" \
+	--define "_builddir %{_topdir}" \
+	--define "_rpmdir %{_topdir}" \
+	--define "_srcrpmdir %{_topdir}" \
+	--define "_specdir %{_topdir}" \
+	--define "_sourcedir %{_topdir}" \
+	-$(1) $(2); \
+	echo "+++++++++++++++++++++++++++++++++++++++++++++"; \
+	echo -n "built:   $(shell awk '/Name/{print $$2}' < $(2))"; \
+	echo -n "-$(shell awk '/Version/{print $$2}' < $(2))"; \
+	echo -n "-$(shell rpm --eval `awk '/Release/{print $$2}' < $(2)`)"; \
+	echo ".$(3).rpm"; \
+	echo "+++++++++++++++++++++++++++++++++++++++++++++";
 
 heatsrpm: rpmcommon heatcommon
 	$(call buildrpm,bs,heat.spec,src)
