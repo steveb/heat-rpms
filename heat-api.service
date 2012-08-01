@@ -4,9 +4,9 @@ After=syslog.target network.target heat-engine.service
 Requires=syslog.target network.target heat-engine.service
 
 [Service]
-Type=simple
 ExecStart=/usr/bin/heat-api
 Restart=on-failure
+User=heat
 
 [Install]
 WantedBy=multi-user.target

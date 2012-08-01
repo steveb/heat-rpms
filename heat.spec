@@ -40,6 +40,7 @@ Requires: python-webob
 Requires(post): systemd-units
 Requires(preun): systemd-units
 Requires(postun): systemd-units
+Requires(pre): shadow-utils
 
 %prep
 %setup -q
@@ -76,19 +77,26 @@ Heat provides AWS CloudFormation functionality for OpenStack.
 %{_mandir}/man1/*.gz
 %{_bindir}/*
 %{python_sitelib}/heat*
-%dir %{_localstatedir}/log/heat
-%dir %{_localstatedir}/lib/heat
+%dir %attr(0755,heat,root) %{_localstatedir}/log/heat
+%dir %attr(0755,heat,root) %{_localstatedir}/lib/heat
 %{_unitdir}/heat*.service
 %dir %{_sysconfdir}/heat
-%config(noreplace) %dir %{_sysconfdir}/heat/bash_completion.d/heat
-%config(noreplace) %{_sysconfdir}/heat/heat-api-paste.ini
-%config(noreplace) %{_sysconfdir}/heat/heat-api.conf
-%config(noreplace) %{_sysconfdir}/heat/heat-engine-paste.ini
-%config(noreplace) %{_sysconfdir}/heat/heat-engine.conf
-%config(noreplace) %{_sysconfdir}/heat/heat-metadata-paste.ini
-%config(noreplace) %{_sysconfdir}/heat/heat-metadata.conf
-%config(noreplace) %{_sysconfdir}/heat/boto.cfg
 %config(noreplace) %{_sysconfdir}/logrotate.d/heat
+%config(noreplace) %{_sysconfdir}/heat/bash_completion.d/heat
+%config(noreplace) %attr(-,root,heat) %{_sysconfdir}/heat/heat-api-paste.ini
+%config(noreplace) %attr(-,root,heat) %{_sysconfdir}/heat/heat-api.conf
+%config(noreplace) %attr(-,root,heat) %{_sysconfdir}/heat/heat-engine-paste.ini
+%config(noreplace) %attr(-,root,heat) %{_sysconfdir}/heat/heat-engine.conf
+%config(noreplace) %attr(-,root,heat) %{_sysconfdir}/heat/heat-metadata-paste.ini
+%config(noreplace) %attr(-,root,heat) %{_sysconfdir}/heat/heat-metadata.conf
+%config(noreplace) %attr(-,root,heat) %{_sysconfdir}/heat/boto.cfg
+
+%pre
+getent group heat >/dev/null || groupadd -r heat
+getent passwd heat  >/dev/null || \
+useradd -r -g heat -d %{_localstatedir}/lib/heat -s /sbin/nologin \
+    -c "Heat daemon" heat
+exit 0
 
 %post
 if [ $1 -eq 1 ] ; then
@@ -117,6 +125,10 @@ if [ $1 -ge 1 ] ; then
 fi
 
 %changelog
+* Wed Aug 1 2012 Jeff Peeler <jpeeler@redhat.com> 6-1
+- create heat user and change file permissions
+- set systemd scripts to run as heat user
+
 * Fri Jul 27 2012 Ian Main <imain@redhat.com> - 5-1
 - added m2crypto patch.
 - bumped version for new release.
