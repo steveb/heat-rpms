@@ -1,7 +1,7 @@
 Name: heat
 Summary: This software provides AWS CloudFormation functionality for OpenStack Essex
 Version: 6
-Release: 1%{?dist}
+Release: 2%{?dist}
 License: ASL 2.0
 Group: System Environment/Base
 URL: http://heat-api.org
@@ -92,10 +92,10 @@ Heat provides AWS CloudFormation functionality for OpenStack.
 %config(noreplace) %attr(-,root,heat) %{_sysconfdir}/heat/boto.cfg
 
 %pre
-getent group heat >/dev/null || groupadd -r heat
-getent passwd heat  >/dev/null || \
-useradd -r -g heat -d %{_localstatedir}/lib/heat -s /sbin/nologin \
-    -c "Heat daemon" heat
+getent group openstack-heat >/dev/null || groupadd -r openstack-heat
+getent passwd openstack-heat  >/dev/null || \
+useradd -r -g openstack-heat -d %{_localstatedir}/lib/heat -s /sbin/nologin \
+    -c "OpenStack Heat Daemon" openstack-heat
 exit 0
 
 %post
@@ -125,6 +125,9 @@ if [ $1 -ge 1 ] ; then
 fi
 
 %changelog
+* Tue Aug  7 2012 Jeff Peeler <jpeeler@redhat.com> 6-2
+- change user/group ids to openstack-heat
+
 * Wed Aug 1 2012 Jeff Peeler <jpeeler@redhat.com> 6-1
 - create heat user and change file permissions
 - set systemd scripts to run as heat user
