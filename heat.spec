@@ -1,7 +1,7 @@
 Name: heat
 Summary: This software provides AWS CloudFormation functionality for OpenStack Essex
 Version: 6
-Release: 2%{?dist}
+Release: 3%{?dist}
 License: ASL 2.0
 Group: System Environment/Base
 URL: http://heat-api.org
@@ -99,32 +99,24 @@ useradd -r -g openstack-heat -d %{_localstatedir}/lib/heat -s /sbin/nologin \
 exit 0
 
 %post
-if [ $1 -eq 1 ] ; then
-    # initial installation
-    /bin/systemctl daemon-reload >/dev/null 2>&1 || :
-fi
+%systemd_post heat-api.service
+%systemd_post heat-engine.service
+%systemd_post heat-metadata.service
 
 %preun
-if [ $1 -eq 0 ] ; then
-    # package removal, not upgrade
-    /bin/systemctl --no-reload disable heat-api.service > /dev/null 2>&1 || :
-    /bin/systemctl --no-reload disable heat-engine.service > /dev/null 2>&1 || :
-    /bin/systemctl --no-reload disable heat-metadata.service > /dev/null 2>&1 || :
-    /bin/systemctl stop heat-api.service > /dev/null 2>&1 || :
-    /bin/systemctl stop heat-engine.service > /dev/null 2>&1 || :
-    /bin/systemctl stop heat-metadata.service > /dev/null 2>&1 || :
-fi
+%systemd_preun heat-api.service
+%systemd_preun heat-engine.service
+%systemd_preun heat-engine.service
 
 %postun
-/bin/systemctl daemon-reload >/dev/null 2>&1 || :
-if [ $1 -ge 1 ] ; then
-    # package upgrade, not uninstall
-    /bin/systemctl try-restart heat-api.service >/dev/null 2>&1 || :
-    /bin/systemctl try-restart heat-engine.service >/dev/null 2>&1 || :
-    /bin/systemctl try-restart heat-metadata.service >/dev/null 2>&1 || :
-fi
+%systemd_postun_with_restart heat-api.service
+%systemd_postun_with_restart heat-engine.service
+%systemd_postun_with_restart heat-metadata.service
 
 %changelog
+* Tue Aug 21 2012 Jeff Peeler <jpeeler@redhat.com> 6-3
+- updated systemd scriptlets
+
 * Tue Aug  7 2012 Jeff Peeler <jpeeler@redhat.com> 6-2
 - change user/group ids to openstack-heat
 
