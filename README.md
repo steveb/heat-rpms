@@ -9,7 +9,7 @@ linux% git clone git://github.com/heat-api/heat.git
 linux% cd heat
 linux% ./setup.py sdist
 
-This will create a source distributoin of heat in dist/heat-$VER.tar.gz
+This will create a source distribution of heat in dist/heat-$VER.tar.gz
 
 Step 2: Create the RPM
 
