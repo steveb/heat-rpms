@@ -1,15 +1,16 @@
 Name: heat
 Summary: This software provides AWS CloudFormation functionality for OpenStack Essex
 Version: 6
-Release: 3%{?dist}
+Release: 4%{?dist}
 License: ASL 2.0
 Group: System Environment/Base
 URL: http://heat-api.org
 Source0: https://github.com/downloads/heat-api/heat/heat-%{version}.tar.gz
 Source1: heat.logrotate
-Source2: heat-api.service
+Source2: heat-api-cfn.service
 Source3: heat-engine.service
 Source4: heat-metadata.service
+Source5: heat-api-cloudwatch.service
 
 # fedora specific patches commented out
 #Patch0: switch-to-using-m2crypto.patch
@@ -50,27 +51,37 @@ Requires(pre): shadow-utils
 %{__python} setup.py build
 
 %install
-%{__python} setup.py install -O1 --skip-build --root=$RPM_BUILD_ROOT
-sed -i -e '/^#!/,1 d' $RPM_BUILD_ROOT/%{python_sitelib}/heat/db/sqlalchemy/manage.py
-sed -i -e '/^#!/,1 d' $RPM_BUILD_ROOT/%{python_sitelib}/heat/db/sqlalchemy/migrate_repo/manage.py
-sed -i -e '/^#!/,1 d' $RPM_BUILD_ROOT/%{python_sitelib}/heat/testing/runner.py
-mkdir -p $RPM_BUILD_ROOT/var/log/heat/
-install -p -D -m 644 %{SOURCE1} $RPM_BUILD_ROOT%{_sysconfdir}/logrotate.d/heat
+%{__python} setup.py install -O1 --skip-build --root=%{buildroot}
+sed -i -e '/^#!/,1 d' %{buildroot}/%{python_sitelib}/heat/db/sqlalchemy/manage.py
+sed -i -e '/^#!/,1 d' %{buildroot}/%{python_sitelib}/heat/db/sqlalchemy/migrate_repo/manage.py
+sed -i -e '/^#!/,1 d' %{buildroot}/%{python_sitelib}/heat/testing/runner.py
+mkdir -p %{buildroot}/var/log/heat/
+install -p -D -m 644 %{SOURCE1} %{buildroot}%{_sysconfdir}/logrotate.d/heat
 
 # install systemd unit files
-install -p -D -m 644 %{SOURCE2} $RPM_BUILD_ROOT%{_unitdir}/heat-api.service
-install -p -D -m 644 %{SOURCE3} $RPM_BUILD_ROOT%{_unitdir}/heat-engine.service
-install -p -D -m 644 %{SOURCE4} $RPM_BUILD_ROOT%{_unitdir}/heat-metadata.service
+install -p -D -m 644 %{SOURCE2} %{buildroot}%{_unitdir}/heat-api-cfn.service
+install -p -D -m 644 %{SOURCE3} %{buildroot}%{_unitdir}/heat-engine.service
+install -p -D -m 644 %{SOURCE4} %{buildroot}%{_unitdir}/heat-metadata.service
+install -p -D -m 644 %{SOURCE5} %{buildroot}%{_unitdir}/heat-api-cloudwatch.service
 
-mkdir -p $RPM_BUILD_ROOT/var/lib/heat/
-mkdir -p $RPM_BUILD_ROOT/etc/heat/
-cp -r etc/* $RPM_BUILD_ROOT/etc/heat/
-mkdir -p $RPM_BUILD_ROOT/%{_mandir}/man1/
-cp -v docs/man/man1/* $RPM_BUILD_ROOT/%{_mandir}/man1/
-rm -rf $RPM_BUILD_ROOT/var/lib/heat/.dummy
+mkdir -p %{buildroot}/var/lib/heat/
+mkdir -p %{buildroot}/etc/heat/
+mkdir -p %{buildroot}/%{_mandir}/man1/
+cp -v docs/man/man1/* %{buildroot}/%{_mandir}/man1/
+rm -rf %{buildroot}/var/lib/heat/.dummy
+
+install -p -D -m 644 %{_builddir}/%{name}-%{version}/etc/heat/heat-api-cfn.conf %{buildroot}/%{_sysconfdir}/heat
+install -p -D -m 644 %{_builddir}/%{name}-%{version}/etc/heat/heat-api-cfn-paste.ini %{buildroot}/%{_sysconfdir}/heat
+install -p -D -m 644 %{_builddir}/%{name}-%{version}/etc/heat/heat-api-cloudwatch.conf %{buildroot}/%{_sysconfdir}/heat
+install -p -D -m 644 %{_builddir}/%{name}-%{version}/etc/heat/heat-api-cloudwatch-paste.ini %{buildroot}/%{_sysconfdir}/heat
+install -p -D -m 644 %{_builddir}/%{name}-%{version}/etc/heat/heat-engine.conf %{buildroot}/%{_sysconfdir}/heat
+install -p -D -m 644 %{_builddir}/%{name}-%{version}/etc/heat/heat-metadata.conf %{buildroot}/%{_sysconfdir}/heat
+install -p -D -m 644 %{_builddir}/%{name}-%{version}/etc/heat/heat-metadata-paste.ini %{buildroot}/%{_sysconfdir}/heat
+install -p -D -m 644 %{_builddir}/%{name}-%{version}/etc/boto.cfg %{buildroot}/%{_sysconfdir}/heat
+install -p -D -m 644 %{_builddir}/%{name}-%{version}/etc/bash_completion.d/heat %{buildroot}/%{_sysconfdir}/bash_completion.d/heat
 
 %description
-Heat provides AWS CloudFormation functionality for OpenStack.
+Heat provides AWS CloudFormation and CloudWatch functionality for OpenStack.
 
 %files
 %doc README.rst LICENSE
@@ -82,13 +93,14 @@ Heat provides AWS CloudFormation functionality for OpenStack.
 %{_unitdir}/heat*.service
 %dir %{_sysconfdir}/heat
 %config(noreplace) %{_sysconfdir}/logrotate.d/heat
-%config(noreplace) %{_sysconfdir}/heat/bash_completion.d/heat
-%config(noreplace) %attr(-,root,heat) %{_sysconfdir}/heat/heat-api-paste.ini
-%config(noreplace) %attr(-,root,heat) %{_sysconfdir}/heat/heat-api.conf
-%config(noreplace) %attr(-,root,heat) %{_sysconfdir}/heat/heat-engine-paste.ini
+%config(noreplace) %{_sysconfdir}/bash_completion.d/heat
+%config(noreplace) %attr(-,root,heat) %{_sysconfdir}/heat/heat-api-cfn.conf
+%config(noreplace) %attr(-,root,heat) %{_sysconfdir}/heat/heat-api-cfn-paste.ini
+%config(noreplace) %attr(-,root,heat) %{_sysconfdir}/heat/heat-api-cloudwatch.conf
+%config(noreplace) %attr(-,root,heat) %{_sysconfdir}/heat/heat-api-cloudwatch-paste.ini
 %config(noreplace) %attr(-,root,heat) %{_sysconfdir}/heat/heat-engine.conf
-%config(noreplace) %attr(-,root,heat) %{_sysconfdir}/heat/heat-metadata-paste.ini
 %config(noreplace) %attr(-,root,heat) %{_sysconfdir}/heat/heat-metadata.conf
+%config(noreplace) %attr(-,root,heat) %{_sysconfdir}/heat/heat-metadata-paste.ini
 %config(noreplace) %attr(-,root,heat) %{_sysconfdir}/heat/boto.cfg
 
 %pre
@@ -99,21 +111,27 @@ useradd -r -g openstack-heat -d %{_localstatedir}/lib/heat -s /sbin/nologin \
 exit 0
 
 %post
-%systemd_post heat-api.service
+%systemd_post heat-api-cfn.service
 %systemd_post heat-engine.service
 %systemd_post heat-metadata.service
+%systemd_post heat-api-cloudwatch.service
 
 %preun
-%systemd_preun heat-api.service
+%systemd_preun heat-api-cfn.service
 %systemd_preun heat-engine.service
 %systemd_preun heat-engine.service
+%systemd_preun heat-api-cloudwatch.service
 
 %postun
-%systemd_postun_with_restart heat-api.service
-%systemd_postun_with_restart heat-engine.service
+%systemd_postun_with_restart heat-api-cfn.service
+%systemd_postun_with_restart heat-engine-cfn.service
 %systemd_postun_with_restart heat-metadata.service
+%systemd_postun_with_restart heat-api-cloudwatch.service
 
 %changelog
+* Tue Sep 18 2012 Steven Dake <sdake@redhat.com> 6-4
+- update to new v6 binary names in heat
+
 * Tue Aug 21 2012 Jeff Peeler <jpeeler@redhat.com> 6-3
 - updated systemd scriptlets
 

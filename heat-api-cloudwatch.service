@@ -1,10 +1,10 @@
 [Unit]
-Description=The Heat API provides an AWS CloudFormation-compatible API to the Heat Engine for starting AWS CloudFormation templates on OpenStack.
+Description=The Heat CloudWatch API provides an AWS CloudWatch-compatible API to the Heat Engine
 After=syslog.target network.target heat-engine.service
 Requires=syslog.target network.target heat-engine.service
 
 [Service]
-ExecStart=/usr/bin/heat-api
+ExecStart=/usr/bin/heat-api-cloudwatch
 Restart=on-failure
 User=heat
 
