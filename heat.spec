@@ -1,7 +1,7 @@
 Name: heat
 Summary: This software provides AWS CloudFormation functionality for OpenStack Essex
 Version: 6
-Release: 4%{?dist}
+Release: 5%{?dist}
 License: ASL 2.0
 Group: System Environment/Base
 URL: http://heat-api.org
@@ -37,6 +37,7 @@ Requires: python-routes
 Requires: pysendfile
 Requires: python-sqlalchemy
 Requires: python-webob
+#Requires: m2crypto
 
 Requires(post): systemd-units
 Requires(preun): systemd-units
@@ -88,20 +89,20 @@ Heat provides AWS CloudFormation and CloudWatch functionality for OpenStack.
 %{_mandir}/man1/*.gz
 %{_bindir}/*
 %{python_sitelib}/heat*
-%dir %attr(0755,heat,root) %{_localstatedir}/log/heat
-%dir %attr(0755,heat,root) %{_localstatedir}/lib/heat
+%dir %attr(0755,openstack-heat,root) %{_localstatedir}/log/heat
+%dir %attr(0755,openstack-heat,root) %{_localstatedir}/lib/heat
 %{_unitdir}/heat*.service
 %dir %{_sysconfdir}/heat
 %config(noreplace) %{_sysconfdir}/logrotate.d/heat
 %config(noreplace) %{_sysconfdir}/bash_completion.d/heat
-%config(noreplace) %attr(-,root,heat) %{_sysconfdir}/heat/heat-api-cfn.conf
-%config(noreplace) %attr(-,root,heat) %{_sysconfdir}/heat/heat-api-cfn-paste.ini
-%config(noreplace) %attr(-,root,heat) %{_sysconfdir}/heat/heat-api-cloudwatch.conf
-%config(noreplace) %attr(-,root,heat) %{_sysconfdir}/heat/heat-api-cloudwatch-paste.ini
-%config(noreplace) %attr(-,root,heat) %{_sysconfdir}/heat/heat-engine.conf
-%config(noreplace) %attr(-,root,heat) %{_sysconfdir}/heat/heat-metadata.conf
-%config(noreplace) %attr(-,root,heat) %{_sysconfdir}/heat/heat-metadata-paste.ini
-%config(noreplace) %attr(-,root,heat) %{_sysconfdir}/heat/boto.cfg
+%config(noreplace) %attr(-,root,openstack-heat) %{_sysconfdir}/heat/heat-api-cfn.conf
+%config(noreplace) %attr(-,root,openstack-heat) %{_sysconfdir}/heat/heat-api-cfn-paste.ini
+%config(noreplace) %attr(-,root,openstack-heat) %{_sysconfdir}/heat/heat-api-cloudwatch.conf
+%config(noreplace) %attr(-,root,openstack-heat) %{_sysconfdir}/heat/heat-api-cloudwatch-paste.ini
+%config(noreplace) %attr(-,root,openstack-heat) %{_sysconfdir}/heat/heat-engine.conf
+%config(noreplace) %attr(-,root,openstack-heat) %{_sysconfdir}/heat/heat-metadata.conf
+%config(noreplace) %attr(-,root,openstack-heat) %{_sysconfdir}/heat/heat-metadata-paste.ini
+%config(noreplace) %attr(-,root,openstack-heat) %{_sysconfdir}/heat/boto.cfg
 
 %pre
 getent group openstack-heat >/dev/null || groupadd -r openstack-heat
@@ -129,6 +130,10 @@ exit 0
 %systemd_postun_with_restart heat-api-cloudwatch.service
 
 %changelog
+* Fri Sep 21 2012 Jeff Peeler <jpeeler@redhat.com> 6-5
+- update m2crypto patch (Fedora)
+- fix user/group install permissions
+
 * Tue Sep 18 2012 Steven Dake <sdake@redhat.com> 6-4
 - update to new v6 binary names in heat
 
