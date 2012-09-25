@@ -6,7 +6,7 @@ Requires=syslog.target network.target heat-engine.service
 [Service]
 ExecStart=/usr/bin/heat-api-cfn
 Restart=on-failure
-User=heat
+User=openstack-heat
 
 [Install]
 WantedBy=multi-user.target

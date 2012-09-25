@@ -6,7 +6,7 @@ Requires=syslog.target network.target qpidd.service mysqld.service openstack-key
 [Service]
 ExecStart=/usr/bin/heat-engine
 Restart=on-failure
-User=heat
+User=openstack-heat
 
 [Install]
 WantedBy=multi-user.target
