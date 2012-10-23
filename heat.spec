@@ -1,16 +1,17 @@
 Name: heat
 Summary: This software provides AWS CloudFormation functionality for OpenStack Essex
-Version: 6
-Release: 5%{?dist}
+Version: 7
+Release: 1%{?dist}
 License: ASL 2.0
 Group: System Environment/Base
 URL: http://heat-api.org
 Source0: https://github.com/downloads/heat-api/heat/heat-%{version}.tar.gz
 Source1: heat.logrotate
-Source2: heat-api-cfn.service
-Source3: heat-engine.service
-Source4: heat-metadata.service
-Source5: heat-api-cloudwatch.service
+Source2: heat-api.service
+Source3: heat-api-cfn.service
+Source4: heat-engine.service
+Source5: heat-metadata.service
+Source6: heat-api-cloudwatch.service
 
 # fedora specific patches commented out
 #Patch0: switch-to-using-m2crypto.patch
@@ -60,6 +61,7 @@ mkdir -p %{buildroot}/var/log/heat/
 install -p -D -m 644 %{SOURCE1} %{buildroot}%{_sysconfdir}/logrotate.d/heat
 
 # install systemd unit files
+install -p -D -m 644 %{SOURCE2} %{buildroot}%{_unitdir}/heat-api.service
 install -p -D -m 644 %{SOURCE2} %{buildroot}%{_unitdir}/heat-api-cfn.service
 install -p -D -m 644 %{SOURCE3} %{buildroot}%{_unitdir}/heat-engine.service
 install -p -D -m 644 %{SOURCE4} %{buildroot}%{_unitdir}/heat-metadata.service
@@ -71,6 +73,8 @@ mkdir -p %{buildroot}/%{_mandir}/man1/
 cp -v docs/man/man1/* %{buildroot}/%{_mandir}/man1/
 rm -rf %{buildroot}/var/lib/heat/.dummy
 
+install -p -D -m 644 %{_builddir}/%{name}-%{version}/etc/heat/heat-api.conf %{buildroot}/%{_sysconfdir}/heat
+install -p -D -m 644 %{_builddir}/%{name}-%{version}/etc/heat/heat-api-paste.ini %{buildroot}/%{_sysconfdir}/heat
 install -p -D -m 644 %{_builddir}/%{name}-%{version}/etc/heat/heat-api-cfn.conf %{buildroot}/%{_sysconfdir}/heat
 install -p -D -m 644 %{_builddir}/%{name}-%{version}/etc/heat/heat-api-cfn-paste.ini %{buildroot}/%{_sysconfdir}/heat
 install -p -D -m 644 %{_builddir}/%{name}-%{version}/etc/heat/heat-api-cloudwatch.conf %{buildroot}/%{_sysconfdir}/heat
@@ -95,6 +99,8 @@ Heat provides AWS CloudFormation and CloudWatch functionality for OpenStack.
 %dir %{_sysconfdir}/heat
 %config(noreplace) %{_sysconfdir}/logrotate.d/heat
 %config(noreplace) %{_sysconfdir}/bash_completion.d/heat
+%config(noreplace) %attr(-,root,openstack-heat) %{_sysconfdir}/heat/heat-api.conf
+%config(noreplace) %attr(-,root,openstack-heat) %{_sysconfdir}/heat/heat-api-paste.ini
 %config(noreplace) %attr(-,root,openstack-heat) %{_sysconfdir}/heat/heat-api-cfn.conf
 %config(noreplace) %attr(-,root,openstack-heat) %{_sysconfdir}/heat/heat-api-cfn-paste.ini
 %config(noreplace) %attr(-,root,openstack-heat) %{_sysconfdir}/heat/heat-api-cloudwatch.conf
@@ -112,24 +118,31 @@ useradd -r -g openstack-heat -d %{_localstatedir}/lib/heat -s /sbin/nologin \
 exit 0
 
 %post
+%systemd_post heat-api.service
 %systemd_post heat-api-cfn.service
 %systemd_post heat-engine.service
 %systemd_post heat-metadata.service
 %systemd_post heat-api-cloudwatch.service
 
 %preun
+%systemd_preun heat-api.service
 %systemd_preun heat-api-cfn.service
 %systemd_preun heat-engine.service
 %systemd_preun heat-engine.service
 %systemd_preun heat-api-cloudwatch.service
 
 %postun
+%systemd_postun_with_restart heat-api.service
 %systemd_postun_with_restart heat-api-cfn.service
 %systemd_postun_with_restart heat-engine-cfn.service
 %systemd_postun_with_restart heat-metadata.service
 %systemd_postun_with_restart heat-api-cloudwatch.service
 
 %changelog
+* Tue Oct 23 2012 Zane Bitter <zbitter@redhat.com> 7-1
+- rebase to v7
+- add heat-api daemon (OpenStack-native API)
+
 * Fri Sep 21 2012 Jeff Peeler <jpeeler@redhat.com> 6-5
 - update m2crypto patch (Fedora)
 - fix user/group install permissions

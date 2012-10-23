@@ -1,0 +1,12 @@
+[Unit]
+Description=The Heat API provides an OpenStack-native ReST API to the Heat Engine for starting AWS CloudFormation templates on OpenStack.
+After=syslog.target network.target heat-engine.service
+Requires=syslog.target network.target heat-engine.service
+
+[Service]
+ExecStart=/usr/bin/heat-api
+Restart=on-failure
+User=openstack-heat
+
+[Install]
+WantedBy=multi-user.target
