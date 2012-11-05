@@ -83,7 +83,7 @@ install -p -D -m 644 %{_builddir}/%{name}-%{version}/etc/heat/heat-engine.conf %
 install -p -D -m 644 %{_builddir}/%{name}-%{version}/etc/heat/heat-metadata.conf %{buildroot}/%{_sysconfdir}/heat
 install -p -D -m 644 %{_builddir}/%{name}-%{version}/etc/heat/heat-metadata-paste.ini %{buildroot}/%{_sysconfdir}/heat
 install -p -D -m 644 %{_builddir}/%{name}-%{version}/etc/boto.cfg %{buildroot}/%{_sysconfdir}/heat
-install -p -D -m 644 %{_builddir}/%{name}-%{version}/etc/bash_completion.d/heat %{buildroot}/%{_sysconfdir}/bash_completion.d/heat
+install -p -D -m 644 %{_builddir}/%{name}-%{version}/etc/bash_completion.d/heat-cfn %{buildroot}/%{_sysconfdir}/bash_completion.d/heat-cfn
 
 %description
 Heat provides AWS CloudFormation and CloudWatch functionality for OpenStack.
@@ -98,7 +98,7 @@ Heat provides AWS CloudFormation and CloudWatch functionality for OpenStack.
 %{_unitdir}/heat*.service
 %dir %{_sysconfdir}/heat
 %config(noreplace) %{_sysconfdir}/logrotate.d/heat
-%config(noreplace) %{_sysconfdir}/bash_completion.d/heat
+%config(noreplace) %{_sysconfdir}/bash_completion.d/heat-cfn
 %config(noreplace) %attr(-,root,openstack-heat) %{_sysconfdir}/heat/heat-api.conf
 %config(noreplace) %attr(-,root,openstack-heat) %{_sysconfdir}/heat/heat-api-paste.ini
 %config(noreplace) %attr(-,root,openstack-heat) %{_sysconfdir}/heat/heat-api-cfn.conf
