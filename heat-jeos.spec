@@ -1,5 +1,5 @@
 Name:		heat-jeos
-Version:	7
+Version:	8
 Release:	1%{?dist}
 Summary:	This software provides the ability to create JEOS images for Heat
 
@@ -17,6 +17,8 @@ Requires:	python-glance
 Requires:	python-lxml
 Requires:	python-prettytable
 Requires:	python-psutil
+
+Requires:	python-boto
 
 
 %description
@@ -36,10 +38,12 @@ This project supports the following features:
 %{__python} setup.py build
 
 %install
-%{__python} setup.py install -O1 --skip-build --root=$RPM_BUILD_ROOT
-mkdir -p $RPM_BUILD_ROOT/%{_mandir}/man1/
+%{__python} setup.py install -O1 --skip-build --root=%{buildroot}
+mkdir -p %{buildroot}/%{_mandir}/man1/
 cp -v docs/man/man1/* $RPM_BUILD_ROOT/%{_mandir}/man1
 
+mkdir -p %{buildroot}/opt/aws/bin
+cp heat_jeos/cfntools/cfn* %{buildroot}/opt/aws/bin
 
 %files
 %doc README.rst LICENSE
@@ -48,8 +52,22 @@ cp -v docs/man/man1/* $RPM_BUILD_ROOT/%{_mandir}/man1
 %{python_sitelib}/heat_jeos*
 
 
+%package cfntools
+Summary:	AWS CloudFormation helper utilities
+Group:		System Environment/Base
+
+%description cfntools
+Bootstrapping tools used for supporting AWS CloudFormation functionality
+
+%files cfntools
+%doc LICENSE
+/opt/aws/bin/*
+
 
 %changelog
+* Fri Nov 30 2012 Jeff Peeler <jpeeler@redhat.com> 8-1
+- added subpackage for cfntools
+
 * Tue Oct 23 2012 Zane Bitter <zbitter@redhat.com> 7-1
 - rebase to v7
 
