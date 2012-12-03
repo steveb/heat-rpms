@@ -18,8 +18,6 @@ Requires:	python-lxml
 Requires:	python-prettytable
 Requires:	python-psutil
 
-Requires:	python-boto
-
 
 %description
 This is a project for creating Just Enough Operating System images
@@ -55,6 +53,8 @@ cp heat_jeos/cfntools/cfn* %{buildroot}/opt/aws/bin
 %package cfntools
 Summary:	AWS CloudFormation helper utilities
 Group:		System Environment/Base
+
+Requires:	python-boto >= 2.4.0
 
 %description cfntools
 Bootstrapping tools used for supporting AWS CloudFormation functionality
