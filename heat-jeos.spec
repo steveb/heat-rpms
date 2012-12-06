@@ -13,7 +13,7 @@ BuildRequires:	python2-devel
 BuildRequires:	python-setuptools
 
 Requires:	oz
-Requires:	python-glance
+Requires:	python-glanceclient
 Requires:	python-lxml
 Requires:	python-prettytable
 Requires:	python-psutil
@@ -51,13 +51,13 @@ cp heat_jeos/cfntools/cfn* %{buildroot}/opt/aws/bin
 
 
 %package cfntools
-Summary:	AWS CloudFormation helper utilities
+Summary:	Heat CloudFormation helper utilities
 Group:		System Environment/Base
 
 Requires:	python-boto >= 2.4.0
 
 %description cfntools
-Bootstrapping tools used for supporting AWS CloudFormation functionality
+Bootstrapping tools used for supporting Heat CloudFormation functionality
 
 %files cfntools
 %doc LICENSE
@@ -65,8 +65,9 @@ Bootstrapping tools used for supporting AWS CloudFormation functionality
 
 
 %changelog
-* Fri Nov 30 2012 Jeff Peeler <jpeeler@redhat.com> 8-1
+* Thu Dec 06 2012 Jeff Peeler <jpeeler@redhat.com> 8-1
 - added subpackage for cfntools
+- fixed glance dependency
 
 * Tue Oct 23 2012 Zane Bitter <zbitter@redhat.com> 7-1
 - rebase to v7
