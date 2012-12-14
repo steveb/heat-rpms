@@ -67,8 +67,16 @@ install -p -D -m 644 %{SOURCE5} %{buildroot}%{_unitdir}/heat-api-cloudwatch.serv
 
 mkdir -p %{buildroot}/var/lib/heat/
 mkdir -p %{buildroot}/etc/heat/
-mkdir -p %{buildroot}/%{_mandir}/man1/
-cp -v docs/man/man1/* %{buildroot}/%{_mandir}/man1/
+
+export PYTHONPATH="$( pwd ):$PYTHONPATH"
+pushd doc
+sphinx-build -b html -d build/doctrees   source build/html
+sphinx-build -b man -d build/doctrees   source build/man
+
+mkdir -p %{buildroot}%{_mandir}/man1
+install -p -D -m 644 build/man/*.1 %{buildroot}%{_mandir}/man1/
+popd
+
 rm -rf %{buildroot}/var/lib/heat/.dummy
 
 install -p -D -m 644 %{_builddir}/%{name}-%{version}/etc/heat/heat-api.conf %{buildroot}/%{_sysconfdir}/heat
@@ -86,6 +94,7 @@ Heat provides AWS CloudFormation and CloudWatch functionality for OpenStack.
 
 %files
 %doc README.rst LICENSE
+%doc doc/build/html
 %{_mandir}/man1/*.gz
 %{_bindir}/*
 %{python_sitelib}/heat*
@@ -133,6 +142,7 @@ exit 0
 * Fri Dec 14 2012 Steve Baker <sbaker@redhat.com> 2013.1-1
 - rebase to 2013.1
 - expunge heat-metadata
+- generate man pages and html developer docs with sphinx
 
 * Tue Oct 23 2012 Zane Bitter <zbitter@redhat.com> 7-1
 - rebase to v7
