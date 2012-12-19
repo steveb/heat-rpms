@@ -1,6 +1,6 @@
 Name: heat
-Summary: This software provides AWS CloudFormation functionality for OpenStack Essex
-Version: 7
+Summary: This software provides cloud orchestration functionality for OpenStack Grizzly
+Version: 2013.1
 Release: 1%{?dist}
 License: ASL 2.0
 Group: System Environment/Base
@@ -10,8 +10,7 @@ Source1: heat.logrotate
 Source2: heat-api.service
 Source3: heat-api-cfn.service
 Source4: heat-engine.service
-Source5: heat-metadata.service
-Source6: heat-api-cloudwatch.service
+Source5: heat-api-cloudwatch.service
 
 # fedora specific patches commented out
 #Patch0: switch-to-using-m2crypto.patch
@@ -62,15 +61,22 @@ install -p -D -m 644 %{SOURCE1} %{buildroot}%{_sysconfdir}/logrotate.d/heat
 
 # install systemd unit files
 install -p -D -m 644 %{SOURCE2} %{buildroot}%{_unitdir}/heat-api.service
-install -p -D -m 644 %{SOURCE2} %{buildroot}%{_unitdir}/heat-api-cfn.service
-install -p -D -m 644 %{SOURCE3} %{buildroot}%{_unitdir}/heat-engine.service
-install -p -D -m 644 %{SOURCE4} %{buildroot}%{_unitdir}/heat-metadata.service
+install -p -D -m 644 %{SOURCE3} %{buildroot}%{_unitdir}/heat-api-cfn.service
+install -p -D -m 644 %{SOURCE4} %{buildroot}%{_unitdir}/heat-engine.service
 install -p -D -m 644 %{SOURCE5} %{buildroot}%{_unitdir}/heat-api-cloudwatch.service
 
 mkdir -p %{buildroot}/var/lib/heat/
 mkdir -p %{buildroot}/etc/heat/
-mkdir -p %{buildroot}/%{_mandir}/man1/
-cp -v docs/man/man1/* %{buildroot}/%{_mandir}/man1/
+
+export PYTHONPATH="$( pwd ):$PYTHONPATH"
+pushd doc
+sphinx-build -b html -d build/doctrees   source build/html
+sphinx-build -b man -d build/doctrees   source build/man
+
+mkdir -p %{buildroot}%{_mandir}/man1
+install -p -D -m 644 build/man/*.1 %{buildroot}%{_mandir}/man1/
+popd
+
 rm -rf %{buildroot}/var/lib/heat/.dummy
 
 install -p -D -m 644 %{_builddir}/%{name}-%{version}/etc/heat/heat-api.conf %{buildroot}/%{_sysconfdir}/heat
@@ -80,8 +86,6 @@ install -p -D -m 644 %{_builddir}/%{name}-%{version}/etc/heat/heat-api-cfn-paste
 install -p -D -m 644 %{_builddir}/%{name}-%{version}/etc/heat/heat-api-cloudwatch.conf %{buildroot}/%{_sysconfdir}/heat
 install -p -D -m 644 %{_builddir}/%{name}-%{version}/etc/heat/heat-api-cloudwatch-paste.ini %{buildroot}/%{_sysconfdir}/heat
 install -p -D -m 644 %{_builddir}/%{name}-%{version}/etc/heat/heat-engine.conf %{buildroot}/%{_sysconfdir}/heat
-install -p -D -m 644 %{_builddir}/%{name}-%{version}/etc/heat/heat-metadata.conf %{buildroot}/%{_sysconfdir}/heat
-install -p -D -m 644 %{_builddir}/%{name}-%{version}/etc/heat/heat-metadata-paste.ini %{buildroot}/%{_sysconfdir}/heat
 install -p -D -m 644 %{_builddir}/%{name}-%{version}/etc/boto.cfg %{buildroot}/%{_sysconfdir}/heat
 install -p -D -m 644 %{_builddir}/%{name}-%{version}/etc/bash_completion.d/heat-cfn %{buildroot}/%{_sysconfdir}/bash_completion.d/heat-cfn
 
@@ -90,6 +94,7 @@ Heat provides AWS CloudFormation and CloudWatch functionality for OpenStack.
 
 %files
 %doc README.rst LICENSE
+%doc doc/build/html
 %{_mandir}/man1/*.gz
 %{_bindir}/*
 %{python_sitelib}/heat*
@@ -106,8 +111,6 @@ Heat provides AWS CloudFormation and CloudWatch functionality for OpenStack.
 %config(noreplace) %attr(-,root,openstack-heat) %{_sysconfdir}/heat/heat-api-cloudwatch.conf
 %config(noreplace) %attr(-,root,openstack-heat) %{_sysconfdir}/heat/heat-api-cloudwatch-paste.ini
 %config(noreplace) %attr(-,root,openstack-heat) %{_sysconfdir}/heat/heat-engine.conf
-%config(noreplace) %attr(-,root,openstack-heat) %{_sysconfdir}/heat/heat-metadata.conf
-%config(noreplace) %attr(-,root,openstack-heat) %{_sysconfdir}/heat/heat-metadata-paste.ini
 %config(noreplace) %attr(-,root,openstack-heat) %{_sysconfdir}/heat/boto.cfg
 
 %pre
@@ -121,13 +124,11 @@ exit 0
 %systemd_post heat-api.service
 %systemd_post heat-api-cfn.service
 %systemd_post heat-engine.service
-%systemd_post heat-metadata.service
 %systemd_post heat-api-cloudwatch.service
 
 %preun
 %systemd_preun heat-api.service
 %systemd_preun heat-api-cfn.service
-%systemd_preun heat-engine.service
 %systemd_preun heat-engine.service
 %systemd_preun heat-api-cloudwatch.service
 
@@ -135,10 +136,14 @@ exit 0
 %systemd_postun_with_restart heat-api.service
 %systemd_postun_with_restart heat-api-cfn.service
 %systemd_postun_with_restart heat-engine-cfn.service
-%systemd_postun_with_restart heat-metadata.service
 %systemd_postun_with_restart heat-api-cloudwatch.service
 
 %changelog
+* Fri Dec 14 2012 Steve Baker <sbaker@redhat.com> 2013.1-1
+- rebase to 2013.1
+- expunge heat-metadata
+- generate man pages and html developer docs with sphinx
+
 * Tue Oct 23 2012 Zane Bitter <zbitter@redhat.com> 7-1
 - rebase to v7
 - add heat-api daemon (OpenStack-native API)
