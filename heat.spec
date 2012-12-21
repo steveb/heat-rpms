@@ -20,12 +20,12 @@ BuildRequires: python2-devel
 BuildRequires: python-setuptools
 BuildRequires: python-sphinx
 
-Requires: heat-common = %{version}-%{release}
-Requires: heat-engine = %{version}-%{release}
-Requires: heat-api = %{version}-%{release}
-Requires: heat-cfn-api = %{version}-%{release}
-Requires: heat-cloudwatch-api = %{version}-%{release}
-Requires: heat-clients = %{version}-%{release}
+Requires: %{name}-common = %{version}-%{release}
+Requires: %{name}-engine = %{version}-%{release}
+Requires: %{name}-api = %{version}-%{release}
+Requires: %{name}-cfn-api = %{version}-%{release}
+Requires: %{name}-cloudwatch-api = %{version}-%{release}
+Requires: %{name}-clients = %{version}-%{release}
 
 %prep
 %setup -q
@@ -126,7 +126,7 @@ exit 0
 Summary: The Heat engine
 Group: System Environment/Base
 
-Requires: heat-common = %{version}-%{release}
+Requires: %{name}-common = %{version}-%{release}
 
 Requires(post): systemd
 Requires(preun): systemd
@@ -156,7 +156,7 @@ OpenStack API for starting CloudFormation templates on OpenStack
 Summary: The Heat API
 Group: System Environment/Base
 
-Requires: heat-common = %{version}-%{release}
+Requires: %{name}-common = %{version}-%{release}
 
 Requires(post): systemd
 Requires(preun): systemd
@@ -187,7 +187,7 @@ OpenStack-native ReST API to the Heat Engine
 Summary: Heat CloudFormation API
 Group: System Environment/Base
 
-Requires: heat-common = %{version}-%{release}
+Requires: %{name}-common = %{version}-%{release}
 
 Requires(post): systemd
 Requires(preun): systemd
@@ -218,7 +218,7 @@ AWS CloudFormation-compatible API to the Heat Engine
 Summary: Heat CloudWatch API
 Group: System Environment/Base
 
-Requires: heat-common = %{version}-%{release}
+Requires: %{name}-common = %{version}-%{release}
 
 Requires(post): systemd
 Requires(preun): systemd
@@ -249,7 +249,7 @@ AWS CloudWatch-compatible API to the Heat Engine
 Summary: Heat clients
 Group: System Environment/Base
 
-Requires: heat-common = %{version}-%{release}
+Requires: %{name}-common = %{version}-%{release}
 
 %description clients
 Heat client tools accessible from the CLI
