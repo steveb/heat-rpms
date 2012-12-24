@@ -2,12 +2,12 @@
 
 GIT_BRANCH=master
 GIT_REPO_HEAT=../heat
-GIT_REPO_HEAT_JEOS=../heat-jeos
+GIT_REPO_HEAT_CFNTOOLS=../heat-cfntools
 
 RPM_HEAT_VERSION=2013.1dev
 RPM_HEAT_RELEASE=$(shell date +%Y%m%d)
-RPM_HEAT_JEOS_VERSION=7
-RPM_HEAT_JEOS_RELEASE=1
+RPM_HEAT_CFNTOOLS_VERSION=1.0
+RPM_HEAT_CFNTOOLS_RELEASE=$(shell date +%Y%m%d)
 RPM_DIST=fc17
 
 YUM_REPO_USER=stevebake
@@ -17,7 +17,7 @@ YUM_DIST=fedora-17
 
 include local.mk
 
-all: clean heatrpm jeosrpm
+all: clean heatrpm cfntoolsrpm
 
 rpmcommon:
 	@mkdir -p rpm-build
@@ -54,11 +54,11 @@ heatsrpm: rpmcommon heatcommon rpm-build/heat-$(RPM_HEAT_VERSION).tar.gz
 heatrpm: rpmcommon heatcommon rpm-build/heat-$(RPM_HEAT_VERSION).tar.gz
 	$(call buildrpm,ba,heat.spec,noarch,$(RPM_HEAT_VERSION),$(RPM_HEAT_RELEASE))
 
-jeossrpm: rpmcommon rpm-build/heat-jeos-$(RPM_HEAT_JEOS_VERSION).tar.gz
-	$(call buildrpm,bs,heat-jeos.spec,src,$(RPM_HEAT_JEOS_VERSION),$(RPM_HEAT_JEOS_RELEASE))
+cfntoolssrpm: rpmcommon rpm-build/heat-cfntools-$(RPM_HEAT_CFNTOOLS_VERSION).tar.gz
+	$(call buildrpm,bs,heat-cfntools.spec,src,$(RPM_HEAT_CFNTOOLS_VERSION),$(RPM_HEAT_CFNTOOLS_RELEASE))
 
-jeosrpm: rpmcommon rpm-build/heat-jeos-$(RPM_HEAT_JEOS_VERSION).tar.gz
-	$(call buildrpm,ba,heat-jeos.spec,noarch,$(RPM_HEAT_JEOS_VERSION),$(RPM_HEAT_JEOS_RELEASE))
+cfntoolsrpm: rpmcommon rpm-build/heat-cfntools-$(RPM_HEAT_CFNTOOLS_VERSION).tar.gz
+	$(call buildrpm,ba,heat-cfntools.spec,noarch,$(RPM_HEAT_CFNTOOLS_VERSION),$(RPM_HEAT_CFNTOOLS_RELEASE))
 
 git-repos:
 	mkdir git-repos
@@ -66,8 +66,8 @@ git-repos:
 git-repos/heat: git-repos
 	git clone $(GIT_REPO_HEAT) git-repos/heat
 
-git-repos/heat-jeos: git-repos
-	git clone $(GIT_REPO_HEAT_JEOS) git-repos/heat-jeos
+git-repos/heat-cfntools: git-repos
+	git clone $(GIT_REPO_HEAT_CFNTOOLS) git-repos/heat-cfntools
 
 sdist-from-git = \
 	cd git-repos/$(1) && \
@@ -80,8 +80,8 @@ sdist-from-git = \
 rpm-build/heat-$(RPM_HEAT_VERSION).tar.gz: git-repos/heat
 	$(call sdist-from-git,heat,$(GIT_BRANCH))
 
-rpm-build/heat-jeos-$(RPM_HEAT_JEOS_VERSION).tar.gz: git-repos/heat-jeos
-	$(call sdist-from-git,heat-jeos,$(GIT_BRANCH))
+rpm-build/heat-cfntools-$(RPM_HEAT_CFNTOOLS_VERSION).tar.gz: git-repos/heat-cfntools
+	$(call sdist-from-git,heat-cfntools,$(GIT_BRANCH))
 
 yum-repo-clean: yum-repo
 	rm -rf yum-repo/$(YUM_REPO)
