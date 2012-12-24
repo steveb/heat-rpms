@@ -10,6 +10,11 @@ RPM_HEAT_JEOS_VERSION=7
 RPM_HEAT_JEOS_RELEASE=1
 RPM_DIST=fc17
 
+YUM_REPO_USER=stevebake
+YUM_REPO=heat-trunk
+YUM_REPO_REMOTE=$(YUM_REPO_USER)@fedorapeople.org:/srv/repos/heat/$(YUM_REPO)
+YUM_DIST=fedora-17
+
 include local.mk
 
 all: clean heatrpm jeosrpm
@@ -77,6 +82,23 @@ rpm-build/heat-$(RPM_HEAT_VERSION).tar.gz: git-repos/heat
 
 rpm-build/heat-jeos-$(RPM_HEAT_JEOS_VERSION).tar.gz: git-repos/heat-jeos
 	$(call sdist-from-git,heat-jeos,$(GIT_BRANCH))
+
+yum-repo-clean: yum-repo
+	rm -rf yum-repo/$(YUM_REPO)
+
+yum-repo:
+	mkdir -p yum-repo/$(YUM_REPO)
+
+yum-repo-populate:
+	cp -f rpm-build/noarch/*.$(RPM_DIST).noarch.rpm yum-repo/$(YUM_REPO)/$(YUM_DIST)/i386
+	cp -f rpm-build/noarch/*.$(RPM_DIST).noarch.rpm yum-repo/$(YUM_REPO)/$(YUM_DIST)/x86_64
+	cp -f rpm-build/*.src.rpm yum-repo/$(YUM_REPO)/$(YUM_DIST)/SRPMS
+
+yum-repo-pull: yum-repo
+	rsync -avtx $(YUM_REPO_REMOTE)/* yum-repo/$(YUM_REPO)
+
+yum-repo-push:
+	rsync -avtx yum-repo/$(YUM_REPO)/* $(YUM_REPO_REMOTE)
 
 .PHONEY: all rpmcommon clean heatsrpm heatrpm
 vpath %.asciidoc docs/man/man1
