@@ -1,7 +1,7 @@
 Name: heat
 Summary: This software provides cloud orchestration functionality for OpenStack Grizzly
-Version: 2013.1
-Release: 2%{?dist}
+Version: %{?_version}
+Release: %{?_release}%{?dist}
 License: ASL 2.0
 Group: System Environment/Base
 URL: http://heat-api.org

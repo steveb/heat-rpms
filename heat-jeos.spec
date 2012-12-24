@@ -1,6 +1,6 @@
 Name:		heat-jeos
-Version:	8
-Release:	1%{?dist}
+Version: %{?_version}
+Release: %{?_release}%{?dist}
 Summary:	This software provides the ability to create JEOS images for Heat
 
 Group:		System Environment/Base

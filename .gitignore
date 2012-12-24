@@ -1,2 +1,3 @@
 rpm-build
-*.tar.gz
+git-repos
+local.mk
