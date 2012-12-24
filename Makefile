@@ -93,6 +93,9 @@ yum-repo-populate:
 	cp -f rpm-build/noarch/*.$(RPM_DIST).noarch.rpm yum-repo/$(YUM_REPO)/$(YUM_DIST)/i386
 	cp -f rpm-build/noarch/*.$(RPM_DIST).noarch.rpm yum-repo/$(YUM_REPO)/$(YUM_DIST)/x86_64
 	cp -f rpm-build/*.src.rpm yum-repo/$(YUM_REPO)/$(YUM_DIST)/SRPMS
+	createrepo --database yum-repo/$(YUM_REPO)/$(YUM_DIST)/i386
+	createrepo --database yum-repo/$(YUM_REPO)/$(YUM_DIST)/x86_64
+	createrepo --database yum-repo/$(YUM_REPO)/$(YUM_DIST)/SRPMS
 
 yum-repo-pull: yum-repo
 	rsync -avtx $(YUM_REPO_REMOTE)/* yum-repo/$(YUM_REPO)
