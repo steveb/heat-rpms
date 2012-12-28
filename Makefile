@@ -16,7 +16,7 @@ YUM_REPO_REMOTE=$(YUM_REPO_USER)@fedorapeople.org:/srv/repos/heat/$(YUM_REPO)
 
 include local.mk
 
-all: clean heatrpm cfntoolsrpm
+all: clean heat-rpms cfntools-rpms
 
 rpmcommon:
 	mkdir -p rpm-build/{BUILD,RPMS,SOURCES,SPECS,SRPMS}
