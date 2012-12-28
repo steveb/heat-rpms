@@ -13,52 +13,54 @@ RPM_DIST=fc17
 YUM_REPO_USER=stevebake
 YUM_REPO=heat-trunk
 YUM_REPO_REMOTE=$(YUM_REPO_USER)@fedorapeople.org:/srv/repos/heat/$(YUM_REPO)
-YUM_DIST=fedora-17
 
 include local.mk
 
 all: clean heatrpm cfntoolsrpm
 
 rpmcommon:
-	@mkdir -p rpm-build
-	@cp patches/* rpm-build/
+	mkdir -p rpm-build/{BUILD,RPMS,SOURCES,SPECS,SRPMS}
+	cp patches/* rpm-build/SOURCES/
 
 heatcommon:
-	@cp *.logrotate rpm-build/
-	@cp *.service rpm-build/
+	cp *.logrotate rpm-build/SOURCES/
+	cp *.service rpm-build/SOURCES/
+	cp *.spec rpm-build/SPECS/
 
 clean: 
 	@echo "Cleaning up, removing rpm-build dir"
 	-rm -rf rpm-build
 	-rm -rf git-repos
 
-# buildargs, spec, rpmtype
-buildrpm = \
-	@rpmbuild --define "_topdir %(pwd)/rpm-build" \
-	--define "_builddir %{_topdir}" \
-	--define "_rpmdir %{_topdir}" \
-	--define "_srcrpmdir %{_topdir}" \
-	--define "_specdir %{_topdir}" \
-	--define "_sourcedir %{_topdir}" \
-    --define "_version $(4)" \
-    --define "_release $(5)" \
-	-$(1) $(2); \
-	echo "+++++++++++++++++++++++++++++++++++++++++++++"; \
-	echo -n "built:   $(shell awk '/Name/{print $$2}' < $(2))"; \
-	echo "-$(4)-$(5).$(3).rpm"; \
-	echo "+++++++++++++++++++++++++++++++++++++++++++++";
+build-srpm = \
+    rpmbuild -bs --define "_topdir $(CURDIR)/rpm-build" \
+    --define "_version $(2)" \
+    --define "_release $(3)" \
+    --target "" \
+    rpm-build/SPECS/$(1)
 
-heatsrpm: rpmcommon heatcommon rpm-build/heat-$(RPM_HEAT_VERSION).tar.gz
-	$(call buildrpm,bs,heat.spec,src,$(RPM_HEAT_VERSION),$(RPM_HEAT_RELEASE))
+build-rpms = \
+    mock -r $(1)\
+    --define "_version $(3)" \
+    --define "_release $(4)" \
+    --resultdir=rpm-build/RPMS \
+    rpm-build/SRPMS/$(2)-$(3)-$(4).$(RPM_DIST).src.rpm
 
-heatrpm: rpmcommon heatcommon rpm-build/heat-$(RPM_HEAT_VERSION).tar.gz
-	$(call buildrpm,ba,heat.spec,noarch,$(RPM_HEAT_VERSION),$(RPM_HEAT_RELEASE))
+heat-srpm: rpmcommon heatcommon rpm-build/SOURCES/heat-$(RPM_HEAT_VERSION).tar.gz
+	$(call build-srpm,heat.spec,$(RPM_HEAT_VERSION),$(RPM_HEAT_RELEASE))
 
-cfntoolssrpm: rpmcommon rpm-build/heat-cfntools-$(RPM_HEAT_CFNTOOLS_VERSION).tar.gz
-	$(call buildrpm,bs,heat-cfntools.spec,src,$(RPM_HEAT_CFNTOOLS_VERSION),$(RPM_HEAT_CFNTOOLS_RELEASE))
+heat-rpms: heat-srpm
+	$(call build-rpms,fedora-17-x86_64,heat,$(RPM_HEAT_VERSION),$(RPM_HEAT_RELEASE))
+	$(call build-rpms,fedora-18-x86_64,heat,$(RPM_HEAT_VERSION),$(RPM_HEAT_RELEASE))
 
-cfntoolsrpm: rpmcommon rpm-build/heat-cfntools-$(RPM_HEAT_CFNTOOLS_VERSION).tar.gz
-	$(call buildrpm,ba,heat-cfntools.spec,noarch,$(RPM_HEAT_CFNTOOLS_VERSION),$(RPM_HEAT_CFNTOOLS_RELEASE))
+cfntools-srpm: rpmcommon heatcommon rpm-build/SOURCES/heat-cfntools-$(RPM_HEAT_CFNTOOLS_VERSION).tar.gz
+	$(call build-srpm,heat-cfntools.spec,$(RPM_HEAT_CFNTOOLS_VERSION),$(RPM_HEAT_CFNTOOLS_RELEASE))
+
+cfntools-rpms: cfntools-srpm
+	$(call build-rpms,fedora-16-x86_64,heat-cfntools,$(RPM_HEAT_CFNTOOLS_VERSION),$(RPM_HEAT_CFNTOOLS_RELEASE))
+	$(call build-rpms,fedora-17-x86_64,heat-cfntools,$(RPM_HEAT_CFNTOOLS_VERSION),$(RPM_HEAT_CFNTOOLS_RELEASE))
+	$(call build-rpms,fedora-18-x86_64,heat-cfntools,$(RPM_HEAT_CFNTOOLS_VERSION),$(RPM_HEAT_CFNTOOLS_RELEASE))
+	$(call build-rpms,epel-6-x86_64,heat-cfntools,$(RPM_HEAT_CFNTOOLS_VERSION),$(RPM_HEAT_CFNTOOLS_RELEASE))
 
 git-repos:
 	mkdir git-repos
@@ -75,12 +77,12 @@ sdist-from-git = \
 	git reset --hard $(2) && \
 	git pull origin $(2) && \
 	./setup.py sdist && \
-	cp dist/* ../../rpm-build
+	cp dist/* ../../rpm-build/SOURCES
 
-rpm-build/heat-$(RPM_HEAT_VERSION).tar.gz: git-repos/heat
+rpm-build/SOURCES/heat-$(RPM_HEAT_VERSION).tar.gz: git-repos/heat
 	$(call sdist-from-git,heat,$(GIT_BRANCH))
 
-rpm-build/heat-cfntools-$(RPM_HEAT_CFNTOOLS_VERSION).tar.gz: git-repos/heat-cfntools
+rpm-build/SOURCES/heat-cfntools-$(RPM_HEAT_CFNTOOLS_VERSION).tar.gz: git-repos/heat-cfntools
 	$(call sdist-from-git,heat-cfntools,$(GIT_BRANCH))
 
 yum-repo-clean: yum-repo
@@ -89,19 +91,26 @@ yum-repo-clean: yum-repo
 yum-repo:
 	mkdir -p yum-repo/$(YUM_REPO)
 
-yum-repo-populate:
-	cp -f rpm-build/noarch/*.$(RPM_DIST).noarch.rpm yum-repo/$(YUM_REPO)/$(YUM_DIST)/i386
-	cp -f rpm-build/noarch/*.$(RPM_DIST).noarch.rpm yum-repo/$(YUM_REPO)/$(YUM_DIST)/x86_64
-	cp -f rpm-build/*.src.rpm yum-repo/$(YUM_REPO)/$(YUM_DIST)/SRPMS
-	createrepo --database yum-repo/$(YUM_REPO)/$(YUM_DIST)/i386
-	createrepo --database yum-repo/$(YUM_REPO)/$(YUM_DIST)/x86_64
-	createrepo --database yum-repo/$(YUM_REPO)/$(YUM_DIST)/SRPMS
+repo-populate-single = \
+	cp -f rpm-build/RPMS/*.$(2).$(3).rpm yum-repo/$(YUM_REPO)/$(1)/$(4) ; \
+	createrepo --database yum-repo/$(YUM_REPO)/$(1)/$(4)
+
+repo-populate = \
+	$(call repo-populate-single,$(1),$(2),noarch,i386) && \
+	$(call repo-populate-single,$(1),$(2),noarch,x86_64) && \
+	$(call repo-populate-single,$(1),$(2),src,SRPMS)
+
+yum-repo-populate: yum-repo-pull
+	$(call repo-populate,fedora-16,fc16)
+	$(call repo-populate,fedora-17,fc17)
+	$(call repo-populate,fedora-18,fc18)
+	$(call repo-populate,epel-6,el6)
 
 yum-repo-pull: yum-repo
-	rsync -avtx $(YUM_REPO_REMOTE)/* yum-repo/$(YUM_REPO)
+	rsync -avtx --delete $(YUM_REPO_REMOTE)/* yum-repo/$(YUM_REPO)
 
 yum-repo-push:
-	rsync -avtx yum-repo/$(YUM_REPO)/* $(YUM_REPO_REMOTE)
+	rsync -avtx --delete yum-repo/$(YUM_REPO)/* $(YUM_REPO_REMOTE)
 
 .PHONEY: all rpmcommon clean heatsrpm heatrpm
 vpath %.asciidoc docs/man/man1
