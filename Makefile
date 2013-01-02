@@ -1,60 +1,116 @@
 #!/usr/bin/make
 
-ASCII2MAN = a2x -D $(dir $@) -d manpage -f manpage $<
-ASCII2HTMLMAN = a2x -D docs/html/man/ -d manpage -f xhtml
-HEATMANPAGES := docs/man/man1/heat.1 docs/man/man1/heat-engine.1 docs/man/man1/heat-api.1
-SITELIB = $(shell python -c "from distutils.sysconfig import get_python_lib; print get_python_lib()")
+GIT_BRANCH=master
+GIT_REPO_HEAT=../heat
+GIT_REPO_HEAT_CFNTOOLS=../heat-cfntools
 
-all: clean heatrpm jeosrpm
+RPM_HEAT_VERSION=2013.1dev
+RPM_HEAT_RELEASE=$(shell date +%Y%m%d)
+RPM_HEAT_CFNTOOLS_VERSION=1.0
+RPM_HEAT_CFNTOOLS_RELEASE=$(shell date +%Y%m%d)
+RPM_DIST=fc17
 
-heatdocs: $(HEATMANPAGES)
+YUM_REPO_USER=stevebake
+YUM_REPO=heat-trunk
+YUM_REPO_REMOTE=$(YUM_REPO_USER)@fedorapeople.org:/srv/repos/heat/$(YUM_REPO)
 
-%.1: %.1.asciidoc
-	$(ASCII2MAN)
+include local.mk
 
-%.5: %.5.asciidoc
-	$(ASCII2MAN)
+all: clean heat-rpms cfntools-rpms
 
 rpmcommon:
-	@mkdir -p rpm-build
-	@cp *.gz rpm-build/
-	@cp patches/* rpm-build/
+	mkdir -p rpm-build/{BUILD,RPMS,SOURCES,SPECS,SRPMS}
+	cp patches/* rpm-build/SOURCES/
 
 heatcommon:
-	@cp *.logrotate rpm-build/
-	@cp *.service rpm-build/
+	cp *.logrotate rpm-build/SOURCES/
+	cp *.service rpm-build/SOURCES/
+	cp *.spec rpm-build/SPECS/
 
-clean:
+clean: 
 	@echo "Cleaning up, removing rpm-build dir"
 	-rm -rf rpm-build
+	-rm -rf git-repos
 
-# buildargs, spec, rpmtype
-buildrpm = \
-	@rpmbuild --define "_topdir %(pwd)/rpm-build" \
-	--define "_builddir %{_topdir}" \
-	--define "_rpmdir %{_topdir}" \
-	--define "_srcrpmdir %{_topdir}" \
-	--define "_specdir %{_topdir}" \
-	--define "_sourcedir %{_topdir}" \
-	-$(1) $(2); \
-	echo "+++++++++++++++++++++++++++++++++++++++++++++"; \
-	echo -n "built:   $(shell awk '/Name/{print $$2}' < $(2))"; \
-	echo -n "-$(shell awk '/Version/{print $$2}' < $(2))"; \
-	echo -n "-$(shell rpm --eval `awk '/Release/{print $$2}' < $(2)`)"; \
-	echo ".$(3).rpm"; \
-	echo "+++++++++++++++++++++++++++++++++++++++++++++";
+build-srpm = \
+    rpmbuild -bs --define "_topdir $(CURDIR)/rpm-build" \
+    --define "_version $(2)" \
+    --define "_release $(3)" \
+    --target "" \
+    rpm-build/SPECS/$(1)
 
-heatsrpm: rpmcommon heatcommon
-	$(call buildrpm,bs,heat.spec,src)
+build-rpms = \
+    mock -r $(1)\
+    --define "_version $(3)" \
+    --define "_release $(4)" \
+    --resultdir=rpm-build/RPMS \
+    rpm-build/SRPMS/$(2)-$(3)-$(4).$(RPM_DIST).src.rpm
 
-heatrpm: rpmcommon heatcommon
-	$(call buildrpm,ba,heat.spec,noarch)
+heat-srpm: rpmcommon heatcommon rpm-build/SOURCES/heat-$(RPM_HEAT_VERSION).tar.gz
+	$(call build-srpm,heat.spec,$(RPM_HEAT_VERSION),$(RPM_HEAT_RELEASE))
 
-jeossrpm: rpmcommon
-	$(call buildrpm,bs,heat-jeos.spec,src)
+heat-rpms: heat-srpm
+	$(call build-rpms,fedora-17-x86_64,heat,$(RPM_HEAT_VERSION),$(RPM_HEAT_RELEASE))
+	$(call build-rpms,fedora-18-x86_64,heat,$(RPM_HEAT_VERSION),$(RPM_HEAT_RELEASE))
 
-jeosrpm: rpmcommon
-	$(call buildrpm,ba,heat-jeos.spec,noarch)
+cfntools-srpm: rpmcommon heatcommon rpm-build/SOURCES/heat-cfntools-$(RPM_HEAT_CFNTOOLS_VERSION).tar.gz
+	$(call build-srpm,heat-cfntools.spec,$(RPM_HEAT_CFNTOOLS_VERSION),$(RPM_HEAT_CFNTOOLS_RELEASE))
 
-.PHONEY: all heatdocs rpmcommon clean heatsrpm heatrpm
+cfntools-rpms: cfntools-srpm
+	$(call build-rpms,fedora-16-x86_64,heat-cfntools,$(RPM_HEAT_CFNTOOLS_VERSION),$(RPM_HEAT_CFNTOOLS_RELEASE))
+	$(call build-rpms,fedora-17-x86_64,heat-cfntools,$(RPM_HEAT_CFNTOOLS_VERSION),$(RPM_HEAT_CFNTOOLS_RELEASE))
+	$(call build-rpms,fedora-18-x86_64,heat-cfntools,$(RPM_HEAT_CFNTOOLS_VERSION),$(RPM_HEAT_CFNTOOLS_RELEASE))
+	$(call build-rpms,epel-6-x86_64,heat-cfntools,$(RPM_HEAT_CFNTOOLS_VERSION),$(RPM_HEAT_CFNTOOLS_RELEASE))
+
+git-repos:
+	mkdir git-repos
+
+git-repos/heat: git-repos
+	git clone $(GIT_REPO_HEAT) git-repos/heat
+
+git-repos/heat-cfntools: git-repos
+	git clone $(GIT_REPO_HEAT_CFNTOOLS) git-repos/heat-cfntools
+
+sdist-from-git = \
+	cd git-repos/$(1) && \
+	git clean -d -x -f && \
+	git reset --hard $(2) && \
+	git pull origin $(2) && \
+	./setup.py sdist && \
+	cp dist/* ../../rpm-build/SOURCES
+
+rpm-build/SOURCES/heat-$(RPM_HEAT_VERSION).tar.gz: git-repos/heat
+	$(call sdist-from-git,heat,$(GIT_BRANCH))
+
+rpm-build/SOURCES/heat-cfntools-$(RPM_HEAT_CFNTOOLS_VERSION).tar.gz: git-repos/heat-cfntools
+	$(call sdist-from-git,heat-cfntools,$(GIT_BRANCH))
+
+yum-repo-clean: yum-repo
+	rm -rf yum-repo/$(YUM_REPO)
+
+yum-repo:
+	mkdir -p yum-repo/$(YUM_REPO)
+
+repo-populate-single = \
+	cp -f rpm-build/RPMS/*.$(2).$(3).rpm yum-repo/$(YUM_REPO)/$(1)/$(4) ; \
+	createrepo --database yum-repo/$(YUM_REPO)/$(1)/$(4)
+
+repo-populate = \
+	$(call repo-populate-single,$(1),$(2),noarch,i386) && \
+	$(call repo-populate-single,$(1),$(2),noarch,x86_64) && \
+	$(call repo-populate-single,$(1),$(2),src,SRPMS)
+
+yum-repo-populate: yum-repo-pull
+	$(call repo-populate,fedora-16,fc16)
+	$(call repo-populate,fedora-17,fc17)
+	$(call repo-populate,fedora-18,fc18)
+	$(call repo-populate,epel-6,el6)
+
+yum-repo-pull: yum-repo
+	rsync -avtx --delete $(YUM_REPO_REMOTE)/* yum-repo/$(YUM_REPO)
+
+yum-repo-push:
+	rsync -avtx --delete yum-repo/$(YUM_REPO)/* $(YUM_REPO_REMOTE)
+
+.PHONEY: all rpmcommon clean heatsrpm heatrpm
 vpath %.asciidoc docs/man/man1
