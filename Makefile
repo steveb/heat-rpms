@@ -36,7 +36,6 @@ build-srpm = \
     rpmbuild -bs --define "_topdir $(CURDIR)/rpm-build" \
     --define "_version $(2)" \
     --define "_release $(3)" \
-    --target "" \
     rpm-build/SPECS/$(1)
 
 build-rpms = \
