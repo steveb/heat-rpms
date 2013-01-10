@@ -3,11 +3,15 @@
 GIT_BRANCH=master
 GIT_REPO_HEAT=../heat
 GIT_REPO_HEAT_CFNTOOLS=../heat-cfntools
+GIT_REPO_HEATCLIENT=../python-heatclient
 
 RPM_HEAT_VERSION=2013.1dev
 RPM_HEAT_RELEASE=$(shell date +%Y%m%d)
 RPM_HEAT_CFNTOOLS_VERSION=1.0
 RPM_HEAT_CFNTOOLS_RELEASE=$(shell date +%Y%m%d)
+RPM_HEATCLIENT_VERSION=0.2.0dev
+RPM_HEATCLIENT_RELEASE=$(shell date +%Y%m%d)
+
 RPM_DIST=fc17
 
 YUM_REPO_USER=stevebake
@@ -16,7 +20,7 @@ YUM_REPO_REMOTE=$(YUM_REPO_USER)@fedorapeople.org:/srv/repos/heat/$(YUM_REPO)
 
 include local.mk
 
-all: clean heat-rpms cfntools-rpms
+all: clean heat-rpms cfntools-rpms heatclient-rpms
 
 rpmcommon:
 	mkdir -p rpm-build/{BUILD,RPMS,SOURCES,SPECS,SRPMS}
@@ -61,6 +65,14 @@ cfntools-rpms: cfntools-srpm
 	$(call build-rpms,fedora-18-x86_64,heat-cfntools,$(RPM_HEAT_CFNTOOLS_VERSION),$(RPM_HEAT_CFNTOOLS_RELEASE))
 	$(call build-rpms,epel-6-x86_64,heat-cfntools,$(RPM_HEAT_CFNTOOLS_VERSION),$(RPM_HEAT_CFNTOOLS_RELEASE))
 
+heatclient-srpm: rpmcommon heatcommon rpm-build/SOURCES/python-heatclient-$(RPM_HEATCLIENT_VERSION).tar.gz
+	$(call build-srpm,python-heatclient.spec,$(RPM_HEATCLIENT_VERSION),$(RPM_HEATCLIENT_RELEASE))
+
+heatclient-rpms: heatclient-srpm
+	$(call build-rpms,fedora-17-x86_64,python-heatclient,$(RPM_HEATCLIENT_VERSION),$(RPM_HEATCLIENT_RELEASE))
+	$(call build-rpms,fedora-18-x86_64,python-heatclient,$(RPM_HEATCLIENT_VERSION),$(RPM_HEATCLIENT_RELEASE))
+	$(call build-rpms,epel-6-x86_64,python-heatclient,$(RPM_HEATCLIENT_VERSION),$(RPM_HEATCLIENT_RELEASE))
+
 git-repos:
 	mkdir git-repos
 
@@ -69,6 +81,9 @@ git-repos/heat: git-repos
 
 git-repos/heat-cfntools: git-repos
 	git clone $(GIT_REPO_HEAT_CFNTOOLS) git-repos/heat-cfntools
+
+git-repos/python-heatclient: git-repos
+	git clone $(GIT_REPO_HEATCLIENT) git-repos/python-heatclient
 
 sdist-from-git = \
 	cd git-repos/$(1) && \
@@ -83,6 +98,9 @@ rpm-build/SOURCES/heat-$(RPM_HEAT_VERSION).tar.gz: git-repos/heat
 
 rpm-build/SOURCES/heat-cfntools-$(RPM_HEAT_CFNTOOLS_VERSION).tar.gz: git-repos/heat-cfntools
 	$(call sdist-from-git,heat-cfntools,$(GIT_BRANCH))
+
+rpm-build/SOURCES/python-heatclient-$(RPM_HEATCLIENT_VERSION).tar.gz: git-repos/python-heatclient
+	$(call sdist-from-git,python-heatclient,$(GIT_BRANCH))
 
 yum-repo-clean: yum-repo
 	rm -rf yum-repo/$(YUM_REPO)
